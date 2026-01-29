@@ -1,0 +1,14 @@
+# Grafana dashboard provisioning
+
+apiVersion: 1
+
+providers:
+  - name: 'AI Marketing Platform'
+    orgId: 1
+    folder: 'AI Marketing'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

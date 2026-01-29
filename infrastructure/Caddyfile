@@ -1,0 +1,93 @@
+# Caddyfile for AI Marketing Platform
+# Development: localhost with self-signed certs
+# Production: Replace with your domain
+
+{
+    # Global options
+    admin off  # Disable admin API in production
+
+    # Development mode - use self-signed certs
+    # Comment out for production with real domain
+    local_certs
+}
+
+# Development configuration
+localhost, 127.0.0.1 {
+    # Security headers
+    header {
+        # HSTS - Strict Transport Security
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+        # Prevent clickjacking
+        X-Frame-Options "DENY"
+
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+
+        # XSS Protection
+        X-XSS-Protection "1; mode=block"
+
+        # Referrer Policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+
+        # Content Security Policy
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+
+        # Permissions Policy
+        Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+
+        # Remove server header
+        -Server
+    }
+
+    # API routes - proxy to FastAPI
+    handle /api/* {
+        reverse_proxy api:8000 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Health check endpoint
+    handle /health {
+        reverse_proxy api:8000
+    }
+
+    # WebSocket support for real-time features
+    handle /ws/* {
+        reverse_proxy api:8000 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Static frontend files
+    handle {
+        root * /srv/frontend
+
+        # Try files, fallback to index.html for SPA routing
+        try_files {path} /index.html
+
+        file_server {
+            # Cache static assets
+            precompressed gzip br
+        }
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
+}
+
+# Production configuration (uncomment and modify for production)
+# yourdomain.com {
+#     # Same configuration as above
+#     # Caddy will automatically obtain Let's Encrypt certificates
+# }

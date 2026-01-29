@@ -1,0 +1,207 @@
+version: '3.8'
+
+services:
+  # Reverse Proxy with auto-TLS
+  caddy:
+    image: caddy:2-alpine
+    container_name: aimarketing-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./frontend/dist:/srv/frontend:ro
+    depends_on:
+      - api
+    networks:
+      - aimarketing
+
+  # FastAPI Application
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aimarketing-api
+    restart: unless-stopped
+    command: >
+      gunicorn app.main:app
+      --workers 4
+      --worker-class uvicorn.workers.UvicornWorker
+      --bind 0.0.0.0:8000
+      --access-logfile -
+      --error-logfile -
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-aimarketing}:${POSTGRES_PASSWORD:-aimarketing_dev}@postgres:5432/${POSTGRES_DB:-aimarketing}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_dev}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production-use-openssl-rand-hex-32}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-me-in-production-use-fernet-key}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-false}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+    volumes:
+      - ./backend:/app:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aimarketing
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Background Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aimarketing-worker
+    restart: unless-stopped
+    command: arq app.workers.settings.WorkerSettings
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-aimarketing}:${POSTGRES_PASSWORD:-aimarketing_dev}@postgres:5432/${POSTGRES_DB:-aimarketing}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_dev}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production-use-openssl-rand-hex-32}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-me-in-production-use-fernet-key}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    volumes:
+      - ./backend:/app:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aimarketing
+
+  # PostgreSQL with TimescaleDB
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: aimarketing-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-aimarketing}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-aimarketing_dev}
+      - POSTGRES_DB=${POSTGRES_DB:-aimarketing}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"  # Expose for local development tools
+    networks:
+      - aimarketing
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aimarketing} -d ${POSTGRES_DB:-aimarketing}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # Redis for caching and job queue
+  redis:
+    image: redis:7-alpine
+    container_name: aimarketing-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_dev}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"  # Expose for local development tools
+    networks:
+      - aimarketing
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_dev}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aimarketing-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./infrastructure/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - aimarketing
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aimarketing-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin_dev}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - aimarketing
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # Loki for log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: aimarketing-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./infrastructure/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - aimarketing
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  aimarketing:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:

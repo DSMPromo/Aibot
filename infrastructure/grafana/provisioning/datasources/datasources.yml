@@ -1,0 +1,19 @@
+# Grafana datasources provisioning
+
+apiVersion: 1
+
+datasources:
+  # Prometheus for metrics
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+
+  # Loki for logs
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
