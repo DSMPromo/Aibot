@@ -774,6 +774,92 @@ resend.Emails.send({
 - SMTP directly (deliverability issues, no analytics)
 - AWS SES without wrapper (low-level, complex setup)
 
+---
+
+### WhatsApp Business API
+
+**Recommended:** Meta Cloud API (direct) or `twilio`
+- **Rationale:** Official Meta API is free (pay per conversation), Twilio adds reliability layer
+- **Use cases:** Campaign alerts, budget warnings, performance summaries
+
+```python
+import httpx
+
+class WhatsAppNotifier:
+    BASE_URL = "https://graph.facebook.com/v18.0"
+
+    async def send_template_message(
+        self,
+        phone_number: str,
+        template_name: str,
+        parameters: list[str]
+    ):
+        """Send pre-approved template message"""
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.BASE_URL}/{self.phone_number_id}/messages",
+                headers={"Authorization": f"Bearer {self.access_token}"},
+                json={
+                    "messaging_product": "whatsapp",
+                    "to": phone_number,
+                    "type": "template",
+                    "template": {
+                        "name": template_name,  # e.g., "campaign_alert"
+                        "language": {"code": "en"},
+                        "components": [{
+                            "type": "body",
+                            "parameters": [{"type": "text", "text": p} for p in parameters]
+                        }]
+                    }
+                }
+            )
+            return response.json()
+```
+
+**Note:** WhatsApp requires pre-approved message templates for business-initiated messages.
+
+---
+
+### Signal Notifications
+
+**Recommended:** `signal-cli` via REST wrapper or `signald`
+- **Rationale:** No official API; use community tools
+- **Pattern:** Self-hosted signal-cli-rest-api container
+
+```python
+import httpx
+
+class SignalNotifier:
+    def __init__(self, signal_api_url: str, sender_number: str):
+        self.api_url = signal_api_url  # e.g., "http://signal-api:8080"
+        self.sender = sender_number
+
+    async def send_to_group(self, group_id: str, message: str):
+        """Send message to Signal group"""
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.api_url}/v2/send",
+                json={
+                    "number": self.sender,
+                    "recipients": [group_id],
+                    "message": message
+                }
+            )
+            return response.json()
+
+# Usage
+await signal.send_to_group(
+    group_id="group.abc123...",
+    message="⚠️ Campaign 'Summer Sale' exceeded budget threshold ($500/$450)"
+)
+```
+
+**Infrastructure:** Deploy `signal-cli-rest-api` Docker container alongside your app.
+
+**Avoid:**
+- Unofficial bots that violate Signal ToS
+- Storing Signal credentials insecurely
+
 ### Frontend (React/TypeScript)
 ```json
 {

@@ -55,6 +55,8 @@
 - Automated rules (pause on threshold)
 - Stripe billing with tiers
 - **Email notifications** (alerts, scheduled reports, system notifications)
+- **WhatsApp Business notifications** (mobile alerts for campaigns/budgets)
+- **Signal notifications** (privacy-focused mobile alerts)
 - **Conversion pixel setup wizard** (guide users to install tracking)
 - **Affiliate program** (referral codes, commission tracking)
 - **Outbound webhooks** (send events to user systems)

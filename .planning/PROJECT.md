@@ -100,6 +100,11 @@ A marketing manager logs in, connects their ad accounts once, describes their ca
 - [ ] Conversion pixel setup wizard (guide users to install tracking pixels)
 - [ ] Outbound webhooks (send events to user's systems)
 - [ ] CSV/bulk import for campaigns
+- [ ] WhatsApp Business notifications (campaign alerts, budget warnings)
+- [ ] Signal group notifications (privacy-focused alternative)
+- [ ] Google Analytics 4 integration (traffic, landing page metrics)
+- [ ] UTM parameter auto-generation for campaign links
+- [ ] Landing page performance tracking
 
 ### Out of Scope
 

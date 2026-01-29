@@ -196,6 +196,8 @@ This document outlines feature expectations for an AI-powered SaaS platform mana
 | Stripe | Billing | Low - Well-documented |
 | Slack | Notifications | Low |
 | **Email Service (Resend/SendGrid)** | Transactional emails, notifications, reports | Low |
+| **WhatsApp Business API** | Campaign alerts, budget warnings to mobile | Medium |
+| **Signal Notifications** | Privacy-focused mobile alerts | Medium |
 | **Conversion Pixel Helper** | Guide users to install Meta Pixel, Google Tag, TikTok Pixel | Medium |
 
 ### Tier 1.5: V1 Features (Build alongside core)
