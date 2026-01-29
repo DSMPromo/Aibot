@@ -72,6 +72,9 @@ A marketing manager logs in, connects their ad accounts once, describes their ca
 ### Active
 
 - [ ] User authentication and account management
+- [ ] Google SSO login (Sign in with Google Workspace)
+- [ ] MFA (Multi-Factor Authentication via TOTP authenticator apps)
+- [ ] Session management (view active sessions, force logout, session timeout)
 - [ ] Connect Google Ads accounts via OAuth
 - [ ] Connect Meta Ads accounts via OAuth
 - [ ] Connect TikTok Ads accounts via OAuth
@@ -84,7 +87,11 @@ A marketing manager logs in, connects their ad accounts once, describes their ca
 - [ ] Performance metrics (clicks, impressions, spend, conversions, CPA, ROAS)
 - [ ] Automation rules (pause low performers, budget alerts)
 - [ ] Multi-account/client management
-- [ ] Role-based access (admin, operator, client)
+- [ ] Role-based access control (RBAC):
+  - [ ] Admin: Full system access, billing, user management
+  - [ ] Manager: Team oversight, approve campaigns, view all reports
+  - [ ] User: Create/edit own campaigns, view assigned accounts
+- [ ] Audit logging (who did what, when, with before/after states)
 - [ ] Subscription billing (Stripe)
 - [ ] Pricing tiers (Starter, Professional, Enterprise)
 - [ ] Affiliate program with referral tracking

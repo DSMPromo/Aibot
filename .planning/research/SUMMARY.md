@@ -59,6 +59,11 @@
 - **Affiliate program** (referral codes, commission tracking)
 - **Outbound webhooks** (send events to user systems)
 - **CSV/bulk import** (import campaigns from spreadsheets)
+- **Google SSO login** (Sign in with Google Workspace)
+- **MFA (TOTP)** (Google Authenticator, Authy support)
+- **RBAC** (Admin → Manager → User roles)
+- **Session management** (view/revoke active sessions)
+- **Audit logging** (who did what, when)
 
 ### Differentiators to Add
 - AI budget allocation across platforms
@@ -86,6 +91,7 @@ google-ads + facebook-business + httpx
 litellm + instructor + openai + anthropic
 authlib + fastapi-users + cryptography
 resend (or sendgrid) - transactional email
+pyotp + qrcode - MFA/TOTP support
 ```
 
 **Frontend:**

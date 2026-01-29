@@ -39,11 +39,21 @@ This document outlines feature expectations for an AI-powered SaaS platform mana
 | Feature | Description | Complexity |
 |---------|-------------|------------|
 | Multi-User Accounts | Team members can access shared workspace | Low |
-| Role-Based Permissions | Admin, Editor, Viewer roles at minimum | Low-Medium |
+| **RBAC (Admin/Manager/User)** | Hierarchical permissions with granular access control | Medium |
+| **Google SSO Login** | Sign in with Google Workspace accounts | Medium |
+| **MFA (TOTP)** | Multi-factor auth via authenticator apps (Google Auth, Authy) | Medium |
+| **Session Management** | View active sessions, force logout, configurable timeout | Low-Medium |
+| **Audit Logging** | Who did what, when, with before/after state tracking | Medium |
 | Ad Account Connections | OAuth-based connection to ad platform accounts | Medium - OAuth flows for each platform |
-| Activity Logs | Who did what and when | Low |
 
-**Why Table Stakes:** Agencies manage multiple clients; brands have multiple team members. Single-user tools don't scale.
+**RBAC Role Definitions:**
+| Role | Permissions |
+|------|-------------|
+| **Admin** | Full system access, billing, user management, organization settings |
+| **Manager** | Team oversight, approve campaigns, view all team reports, manage team members |
+| **User** | Create/edit own campaigns, view assigned ad accounts only |
+
+**Why Table Stakes:** Agencies manage multiple clients; brands have multiple team members. Security (MFA, audit logs) is expected for platforms handling ad spend.
 
 ### 4. Basic Automation
 

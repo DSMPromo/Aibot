@@ -292,6 +292,156 @@ ad = await client.chat.completions.create(
 
 ---
 
+### Google SSO (Sign in with Google)
+
+**Recommended:** `authlib` + `httpx` (same as ad platform OAuth)
+- **Rationale:** Google OAuth 2.0 with OpenID Connect for user identity
+- Uses same library as ad platform connections (code reuse)
+
+```python
+from authlib.integrations.starlette_client import OAuth
+
+oauth = OAuth()
+oauth.register(
+    name='google',
+    client_id=settings.GOOGLE_SSO_CLIENT_ID,
+    client_secret=settings.GOOGLE_SSO_CLIENT_SECRET,
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
+@app.get("/auth/google")
+async def google_login(request: Request):
+    redirect_uri = request.url_for('google_callback')
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+@app.get("/auth/google/callback")
+async def google_callback(request: Request):
+    token = await oauth.google.authorize_access_token(request)
+    user_info = token.get('userinfo')
+    # Create or link user account
+    return await handle_sso_login(user_info['email'], user_info['name'], provider='google')
+```
+
+**Note:** Requires separate Google Cloud OAuth credentials (not same as Google Ads API)
+
+---
+
+### MFA (Multi-Factor Authentication)
+
+**Recommended:** `pyotp` for TOTP
+- **Version:** `2.9.x`
+- **Rationale:** Standard TOTP (RFC 6238), works with Google Authenticator, Authy, 1Password
+- **Install:** `pip install pyotp qrcode[pil]`
+
+```python
+import pyotp
+import qrcode
+from io import BytesIO
+
+# Generate secret for user (store encrypted in DB)
+def generate_mfa_secret() -> str:
+    return pyotp.random_base32()
+
+# Generate QR code for authenticator app setup
+def generate_mfa_qr(user_email: str, secret: str) -> bytes:
+    totp = pyotp.TOTP(secret)
+    provisioning_uri = totp.provisioning_uri(
+        name=user_email,
+        issuer_name="AI Marketing Platform"
+    )
+    qr = qrcode.make(provisioning_uri)
+    buffer = BytesIO()
+    qr.save(buffer, format='PNG')
+    return buffer.getvalue()
+
+# Verify TOTP code
+def verify_mfa_code(secret: str, code: str) -> bool:
+    totp = pyotp.TOTP(secret)
+    return totp.verify(code, valid_window=1)  # Allow 30-second drift
+```
+
+**Recovery codes:** Generate 10 single-use backup codes, store hashed
+
+**Avoid:**
+- SMS-based MFA (SIM swapping attacks, delivery issues)
+- Email-based MFA (if email is compromised, MFA is useless)
+- Rolling your own TOTP implementation
+
+---
+
+### Session Management
+
+**Recommended:** Redis-backed sessions with `fastapi-users` or custom
+- Store session metadata: device, IP, location, last active
+- Allow users to view and revoke active sessions
+
+```python
+# Session model
+class UserSession(Base):
+    id: UUID
+    user_id: UUID
+    token_hash: str  # Hash of JWT, not the JWT itself
+    device_info: str  # User-Agent parsed
+    ip_address: str
+    location: str  # GeoIP lookup
+    created_at: datetime
+    last_active_at: datetime
+    is_active: bool
+
+# Revoke session
+async def revoke_session(session_id: UUID, user_id: UUID):
+    session = await get_session(session_id)
+    if session.user_id != user_id:
+        raise PermissionError()
+    session.is_active = False
+    await invalidate_token_in_redis(session.token_hash)
+```
+
+---
+
+### Audit Logging
+
+**Recommended:** Structured audit events in PostgreSQL
+- **Pattern:** Append-only audit table with JSON payload
+
+```python
+from enum import Enum
+
+class AuditAction(str, Enum):
+    USER_LOGIN = "user.login"
+    USER_LOGOUT = "user.logout"
+    MFA_ENABLED = "user.mfa.enabled"
+    CAMPAIGN_CREATED = "campaign.created"
+    CAMPAIGN_UPDATED = "campaign.updated"
+    CAMPAIGN_DELETED = "campaign.deleted"
+    SETTINGS_CHANGED = "org.settings.changed"
+
+class AuditLog(Base):
+    id: UUID
+    org_id: UUID
+    user_id: UUID
+    action: AuditAction
+    resource_type: str  # "campaign", "user", "ad_account"
+    resource_id: UUID
+    changes: dict  # {"field": {"old": X, "new": Y}}
+    ip_address: str
+    user_agent: str
+    created_at: datetime
+
+# Usage
+await create_audit_log(
+    action=AuditAction.CAMPAIGN_UPDATED,
+    resource_type="campaign",
+    resource_id=campaign.id,
+    changes={"budget": {"old": 100, "new": 150}}
+)
+```
+
+**Retention:** Keep 90 days hot, archive to cold storage
+
+---
+
 ### OAuth 2.0 for Ad Platforms
 
 **Recommended:** `authlib`
