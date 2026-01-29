@@ -595,7 +595,34 @@ pandas>=2.2.0
 openpyxl>=3.1.0
 structlog>=24.0.0
 sentry-sdk[fastapi]>=2.0.0
+resend>=2.0.0  # or sendgrid>=6.11.0
 ```
+
+### Email Service (Transactional)
+
+**Recommended:** `resend`
+- **Version:** `2.0.0+`
+- **Rationale:** Modern API, excellent DX, generous free tier (3,000 emails/month), React email templates
+- **Install:** `pip install resend`
+
+```python
+import resend
+
+resend.api_key = "re_123456789"
+
+resend.Emails.send({
+    "from": "noreply@yourdomain.com",
+    "to": "user@example.com",
+    "subject": "Campaign Alert: Budget threshold reached",
+    "html": render_template("emails/budget_alert.html", data=alert_data)
+})
+```
+
+**Alternative:** `sendgrid` - More features, higher volume, but more complex API
+
+**Avoid:**
+- SMTP directly (deliverability issues, no analytics)
+- AWS SES without wrapper (low-level, complex setup)
 
 ### Frontend (React/TypeScript)
 ```json

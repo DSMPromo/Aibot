@@ -185,6 +185,16 @@ This document outlines feature expectations for an AI-powered SaaS platform mana
 | TikTok Marketing API | Core platform | Medium-High - Newer, less mature |
 | Stripe | Billing | Low - Well-documented |
 | Slack | Notifications | Low |
+| **Email Service (Resend/SendGrid)** | Transactional emails, notifications, reports | Low |
+| **Conversion Pixel Helper** | Guide users to install Meta Pixel, Google Tag, TikTok Pixel | Medium |
+
+### Tier 1.5: V1 Features (Build alongside core)
+
+| Integration | Use Case | Complexity |
+|-------------|----------|------------|
+| **Affiliate Tracking System** | Referral codes, commission tracking, payouts | Medium |
+| **Outbound Webhooks** | Let users receive campaign events in their systems | Low-Medium |
+| **CSV/Bulk Import** | Import campaigns from spreadsheets | Medium |
 
 ### Tier 2: High Value (Build Second)
 

@@ -35,6 +35,8 @@ A marketing manager logs in, connects their ad accounts once, describes their ca
 - TikTok Marketing API (developer access granted)
 - Stripe for billing
 - Multiple AI providers for text generation
+- Email service (Resend/SendGrid) for notifications and reports
+- Conversion pixel management (Meta Pixel, Google Tag, TikTok Pixel)
 
 ## Constraints
 
@@ -87,6 +89,10 @@ A marketing manager logs in, connects their ad accounts once, describes their ca
 - [ ] Pricing tiers (Starter, Professional, Enterprise)
 - [ ] Affiliate program with referral tracking
 - [ ] Exportable reports (PDF/CSV)
+- [ ] Email notifications (campaign alerts, scheduled reports, system notifications)
+- [ ] Conversion pixel setup wizard (guide users to install tracking pixels)
+- [ ] Outbound webhooks (send events to user's systems)
+- [ ] CSV/bulk import for campaigns
 
 ### Out of Scope
 

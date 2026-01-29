@@ -54,6 +54,11 @@
 - Basic metrics (spend, clicks, conversions)
 - Automated rules (pause on threshold)
 - Stripe billing with tiers
+- **Email notifications** (alerts, scheduled reports, system notifications)
+- **Conversion pixel setup wizard** (guide users to install tracking)
+- **Affiliate program** (referral codes, commission tracking)
+- **Outbound webhooks** (send events to user systems)
+- **CSV/bulk import** (import campaigns from spreadsheets)
 
 ### Differentiators to Add
 - AI budget allocation across platforms
@@ -80,6 +85,7 @@ arq + redis
 google-ads + facebook-business + httpx
 litellm + instructor + openai + anthropic
 authlib + fastapi-users + cryptography
+resend (or sendgrid) - transactional email
 ```
 
 **Frontend:**
