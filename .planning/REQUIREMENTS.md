@@ -10,6 +10,7 @@
 
 | Prefix | Category |
 |--------|----------|
+| SEC | Security (Day One Priority) |
 | AUTH | Authentication & Security |
 | USER | User & Access Management |
 | CAMP | Campaign Management |
@@ -19,6 +20,92 @@
 | BILL | Billing & Subscription |
 | INTG | Integrations |
 | NOTIF | Notifications |
+
+---
+
+## SEC: Security (DAY ONE - Non-Negotiable)
+
+> **These requirements MUST be implemented from the first line of code.**
+> Security is not a feature - it's the foundation.
+
+### Data Protection
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-001 | All data encrypted at rest (AES-256) | Must | 1 |
+| SEC-002 | All data encrypted in transit (TLS 1.3) | Must | 1 |
+| SEC-003 | OAuth tokens encrypted with Fernet before storage | Must | 1 |
+| SEC-004 | Secrets in environment variables, never in code | Must | 1 |
+| SEC-005 | Database credentials rotated quarterly | Must | 1 |
+| SEC-006 | PII data minimization (collect only what's needed) | Must | 1 |
+
+### Application Security
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-007 | Input validation on ALL endpoints (Pydantic) | Must | 1 |
+| SEC-008 | SQL injection prevention (parameterized queries only) | Must | 1 |
+| SEC-009 | XSS prevention (output encoding, CSP headers) | Must | 1 |
+| SEC-010 | CSRF protection on state-changing operations | Must | 1 |
+| SEC-011 | Rate limiting on all public endpoints | Must | 1 |
+| SEC-012 | Rate limiting on authentication (prevent brute force) | Must | 1 |
+| SEC-013 | Secure HTTP headers (HSTS, X-Frame-Options, etc.) | Must | 1 |
+| SEC-014 | Content Security Policy (CSP) headers | Must | 1 |
+| SEC-015 | No sensitive data in URLs or logs | Must | 1 |
+
+### Authentication Security
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-016 | Password hashing with Argon2id (not bcrypt) | Must | 1 |
+| SEC-017 | Minimum password complexity enforced | Must | 1 |
+| SEC-018 | Account lockout after failed attempts | Must | 1 |
+| SEC-019 | Secure session management (HttpOnly, Secure, SameSite) | Must | 1 |
+| SEC-020 | JWT tokens with short expiry (15 min access, 7 day refresh) | Must | 1 |
+| SEC-021 | Token revocation capability | Must | 1 |
+
+### API Security
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-022 | API authentication required on all endpoints | Must | 1 |
+| SEC-023 | Authorization checks on every request (RBAC) | Must | 1 |
+| SEC-024 | Webhook signature verification | Must | 2 |
+| SEC-025 | API keys hashed before storage | Must | 1 |
+| SEC-026 | No credentials in API responses | Must | 1 |
+
+### Infrastructure Security
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-027 | Firewall configured (only necessary ports open) | Must | 1 |
+| SEC-028 | SSH key-only authentication (no passwords) | Must | 1 |
+| SEC-029 | Automated security updates enabled | Must | 1 |
+| SEC-030 | Database not publicly accessible | Must | 1 |
+| SEC-031 | Redis not publicly accessible | Must | 1 |
+| SEC-032 | Regular automated backups (encrypted) | Must | 1 |
+| SEC-033 | Backup restoration tested monthly | Must | 1 |
+
+### Monitoring & Incident Response
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-034 | Security event logging (login attempts, permission changes) | Must | 1 |
+| SEC-035 | Failed login attempt alerts | Must | 1 |
+| SEC-036 | Suspicious activity detection (impossible travel, etc.) | Should | 2 |
+| SEC-037 | Incident response plan documented | Must | 1 |
+| SEC-038 | Security contact email published | Must | 1 |
+
+### Compliance Foundations
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-039 | Privacy policy published | Must | 1 |
+| SEC-040 | Terms of service published | Must | 1 |
+| SEC-041 | Cookie consent banner (GDPR) | Must | 1 |
+| SEC-042 | Data export capability (GDPR right to portability) | Should | 2 |
+| SEC-043 | Account deletion capability (GDPR right to erasure) | Must | 1 |
+| SEC-044 | Data processing agreement template ready | Should | 2 |
 
 ---
 
@@ -242,6 +329,7 @@ These requirements ensure humans maintain control over automated actions:
 
 | Category | Must | Should | Could | Total |
 |----------|------|--------|-------|-------|
+| **SEC** | **41** | **3** | **0** | **44** |
 | AUTH | 9 | 1 | 0 | 10 |
 | USER | 8 | 3 | 0 | 11 |
 | CAMP | 12 | 3 | 0 | 17 |
@@ -251,17 +339,35 @@ These requirements ensure humans maintain control over automated actions:
 | BILL | 7 | 5 | 0 | 12 |
 | INTG | 6 | 6 | 2 | 14 |
 | NOTIF | 5 | 6 | 0 | 11 |
-| **Total** | **74** | **40** | **2** | **118** |
+| **Total** | **115** | **43** | **2** | **162** |
 
 ---
 
-## V1 Scope: 74 Must-Have Requirements
+## V1 Scope: 115 Must-Have Requirements
 
 Organized by build phase (from ARCHITECTURE.md):
 
-### Phase 1: Foundation (Weeks 1-3)
+### Phase 1: Foundation (Weeks 1-3) - SECURITY FIRST
+- **SEC-001 to SEC-044 (Security foundations - DAY ONE)**
 - AUTH-001 to AUTH-010 (Authentication)
 - USER-001 to USER-011 (User Management)
+
+**Security Checklist for Phase 1:**
+```
+[ ] TLS 1.3 configured
+[ ] Database encryption at rest enabled
+[ ] Secrets in environment variables
+[ ] Input validation middleware active
+[ ] Rate limiting configured
+[ ] Secure headers middleware
+[ ] Password hashing with Argon2id
+[ ] Session security (HttpOnly, Secure, SameSite)
+[ ] Firewall rules configured
+[ ] Database not publicly accessible
+[ ] Backup automation running
+[ ] Privacy policy published
+[ ] Security logging enabled
+```
 
 ### Phase 2: OAuth + Connections (Weeks 4-6)
 - CAMP-001 to CAMP-006 (Ad Account Connections)

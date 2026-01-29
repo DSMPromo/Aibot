@@ -44,6 +44,30 @@ A marketing manager logs in, connects their ad accounts once, describes their ca
 - **Team:** Solo developer with Claude assistance
 - **Images:** Users upload their own (no AI image generation in v1)
 - **Compliance:** Must adhere to each ad platform's API policies
+- **Security:** Security-first development - all security requirements implemented from Day One
+
+## Security (Day One Priority)
+
+> Security is not a feature. It's the foundation.
+
+### Non-Negotiables (Before First Deploy)
+- [ ] TLS 1.3 on all connections
+- [ ] Data encrypted at rest (AES-256)
+- [ ] OAuth tokens encrypted before storage (Fernet)
+- [ ] Secrets in environment variables only
+- [ ] Input validation on all endpoints (Pydantic)
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS prevention (output encoding, CSP)
+- [ ] Rate limiting (auth + public endpoints)
+- [ ] Secure headers (HSTS, X-Frame-Options, CSP)
+- [ ] Password hashing with Argon2id
+- [ ] JWT short expiry (15 min access token)
+- [ ] Firewall configured (minimal ports)
+- [ ] Database not publicly accessible
+- [ ] Automated encrypted backups
+- [ ] Security event logging
+- [ ] Privacy policy + Terms of Service
+- [ ] GDPR: Cookie consent, account deletion
 
 ## Key Decisions
 

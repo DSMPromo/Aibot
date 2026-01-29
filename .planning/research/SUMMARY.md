@@ -5,10 +5,25 @@
 
 ---
 
+## Security First (Day One)
+
+> **41 security requirements must be implemented before first deploy.**
+
+| Category | Requirements |
+|----------|--------------|
+| Data Protection | Encryption at rest (AES-256), TLS 1.3, token encryption |
+| App Security | Input validation, SQL injection prevention, XSS, CSRF, rate limiting |
+| Auth Security | Argon2id hashing, secure sessions, JWT short expiry |
+| Infrastructure | Firewall, DB not public, encrypted backups |
+| Compliance | Privacy policy, GDPR (consent, deletion, export) |
+
+---
+
 ## Key Decisions
 
 | Area | Recommendation | Rationale |
 |------|---------------|-----------|
+| **Security** | Security-first from Day One | Can't retrofit security; build it in |
 | **Architecture** | Modular monolith | Simpler for solo dev; split later if needed |
 | **Ad Platform Abstraction** | Adapter pattern | Clean separation; testable; platform-agnostic core |
 | **Background Jobs** | arq (or Celery) + Redis | Async-native; scheduling; retries |

@@ -5,6 +5,191 @@
 
 ---
 
+## 0. Security Stack (DAY ONE - Implement First)
+
+> **Security is the foundation. These libraries and patterns are non-negotiable.**
+
+### Password Hashing
+
+**Recommended:** `argon2-cffi`
+- **Version:** `23.1.0+`
+- **Rationale:** Argon2id is the winner of the Password Hashing Competition; more secure than bcrypt
+- **Install:** `pip install argon2-cffi`
+
+```python
+from argon2 import PasswordHasher
+
+ph = PasswordHasher()
+
+# Hash password
+hashed = ph.hash("user_password")
+
+# Verify password
+try:
+    ph.verify(hashed, "user_password")
+except argon2.exceptions.VerifyMismatchError:
+    raise InvalidCredentials()
+```
+
+**Avoid:** bcrypt (older, less tunable), MD5/SHA (never for passwords)
+
+---
+
+### Rate Limiting
+
+**Recommended:** `slowapi`
+- **Version:** `0.1.9+`
+- **Rationale:** FastAPI-native rate limiting with Redis backend
+- **Install:** `pip install slowapi`
+
+```python
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+@app.post("/auth/login")
+@limiter.limit("5/minute")  # Brute force protection
+async def login(request: Request):
+    ...
+
+@app.get("/api/campaigns")
+@limiter.limit("100/minute")  # General API rate limit
+async def get_campaigns():
+    ...
+```
+
+---
+
+### Secure Headers
+
+**Recommended:** `secure`
+- **Version:** `0.3.0+`
+- **Rationale:** Easy secure headers middleware
+- **Install:** `pip install secure`
+
+```python
+import secure
+
+secure_headers = secure.Secure(
+    hsts=secure.StrictTransportSecurity().max_age(31536000).include_subdomains(),
+    xfo=secure.XFrameOptions().deny(),
+    csp=secure.ContentSecurityPolicy()
+        .default_src("'self'")
+        .script_src("'self'", "'unsafe-inline'")  # Adjust for React
+        .style_src("'self'", "'unsafe-inline'"),
+    referrer=secure.ReferrerPolicy().strict_origin_when_cross_origin(),
+    permissions=secure.PermissionsPolicy().geolocation("'none'").camera("'none'")
+)
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    secure_headers.framework.fastapi(response)
+    return response
+```
+
+---
+
+### Input Validation
+
+**Recommended:** `pydantic` (built into FastAPI)
+- **Version:** `2.9.x`
+- **Rationale:** Type validation, automatic sanitization, JSON schema generation
+
+```python
+from pydantic import BaseModel, EmailStr, constr, validator
+import bleach
+
+class CreateCampaignRequest(BaseModel):
+    name: constr(min_length=1, max_length=100)
+    budget: float
+    email: EmailStr
+
+    @validator('name')
+    def sanitize_name(cls, v):
+        return bleach.clean(v)  # XSS prevention
+```
+
+---
+
+### Secrets Management
+
+**Recommended:** `pydantic-settings` + environment variables
+- **Version:** `2.5.x`
+- **Rationale:** Type-safe settings from environment; never hardcode secrets
+
+```python
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    database_url: str
+    secret_key: str
+    google_client_id: str
+    google_client_secret: str
+    openai_api_key: str
+    encryption_key: str  # For Fernet
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+settings = Settings()
+```
+
+**Never:** Commit `.env` files, hardcode secrets, log sensitive values
+
+---
+
+### CSRF Protection
+
+**Recommended:** `fastapi-csrf-protect`
+- **Version:** `0.3.x`
+- **Rationale:** SameSite cookies + CSRF tokens for state-changing operations
+
+```python
+from fastapi_csrf_protect import CsrfProtect
+
+@CsrfProtect.load_config
+def get_csrf_config():
+    return CsrfSettings(secret_key=settings.secret_key)
+```
+
+---
+
+### Security Logging
+
+**Recommended:** `structlog` with security context
+- **Version:** `24.x`
+
+```python
+import structlog
+
+logger = structlog.get_logger()
+
+# Log security events
+logger.info("login_attempt", user_email=email, ip=request.client.host, success=True)
+logger.warning("login_failed", user_email=email, ip=request.client.host, reason="invalid_password")
+logger.critical("permission_denied", user_id=user.id, resource="campaign", action="delete")
+```
+
+---
+
+### Security Dependencies Summary
+
+```txt
+# Security (add to requirements.txt)
+argon2-cffi>=23.1.0      # Password hashing
+slowapi>=0.1.9           # Rate limiting
+secure>=0.3.0            # Security headers
+bleach>=6.1.0            # HTML sanitization
+fastapi-csrf-protect>=0.3.0  # CSRF protection
+python-multipart>=0.0.9  # Secure file uploads
+```
+
+---
+
 ## 1. Ad Platform API Integrations (Python)
 
 ### Google Ads API
