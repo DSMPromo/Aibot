@@ -137,5 +137,12 @@ A marketing manager logs in, connects their ad accounts once, describes their ca
 - Mobile apps - responsive web sufficient
 - White-label - adds complexity, validate demand first
 
+## Related Documents
+
+- **PLATFORM.md** - Platform-level decisions (data ownership, observability, admin tooling, exit paths)
+- **REQUIREMENTS.md** - All requirements with REQ-IDs
+- **research/STACK.md** - Technology recommendations
+- **research/ARCHITECTURE.md** - System design patterns
+
 ---
-*Last updated: 2026-01-29 after initialization*
+*Last updated: 2026-01-29*

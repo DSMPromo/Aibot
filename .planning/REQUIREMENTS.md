@@ -20,6 +20,206 @@
 | BILL | Billing & Subscription |
 | INTG | Integrations |
 | NOTIF | Notifications |
+| PLAT | Platform Operations |
+| DATA | Data Management |
+| ADMIN | Internal Administration |
+
+---
+
+## PLAT: Platform Operations (Before Launch)
+
+> Platform-level requirements for operations, observability, and scale.
+
+### Observability
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| PLAT-001 | System health metrics (API latency, error rate, DB connections) | Must | 1 |
+| PLAT-002 | Prometheus + Grafana for metrics visualization | Must | 1 |
+| PLAT-003 | Structured logging with Loki or similar | Must | 1 |
+| PLAT-004 | Error tracking with Sentry | Must | 1 |
+| PLAT-005 | External uptime monitoring (UptimeRobot) | Must | 1 |
+| PLAT-006 | Slack alerts for system issues | Must | 1 |
+
+### Connector Health
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| PLAT-007 | Google Ads connector failure detection (3 strikes) | Must | 2 |
+| PLAT-008 | Meta Ads connector failure detection | Must | 2 |
+| PLAT-009 | TikTok Ads connector failure detection | Must | 2 |
+| PLAT-010 | Auto-disable sync on repeated failures | Must | 2 |
+| PLAT-011 | User notification on connector failure | Must | 2 |
+
+### Job Management
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| PLAT-012 | Job retry with exponential backoff | Must | 1 |
+| PLAT-013 | Dead letter queue for failed jobs | Must | 1 |
+| PLAT-014 | Dead letter inspection UI (admin) | Must | 2 |
+| PLAT-015 | Job queue depth alerting | Must | 1 |
+| PLAT-016 | Daily dead letter digest to ops | Should | 2 |
+
+---
+
+## DATA: Data Management
+
+> Data ownership, retention, and compliance requirements.
+
+### Retention Policies
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| DATA-001 | Campaign data retained while subscribed + 90 days | Must | 1 |
+| DATA-002 | Performance metrics retained 2 years | Must | 1 |
+| DATA-003 | Audit logs retained 90 days hot, 2 years cold | Must | 1 |
+| DATA-004 | AI generation history deleted after 90 days | Must | 1 |
+| DATA-005 | OAuth tokens deleted immediately on disconnect | Must | 1 |
+| DATA-006 | User PII deleted 30 days after account deletion | Must | 1 |
+
+### Export
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| DATA-007 | Export campaigns (JSON, CSV) | Must | 2 |
+| DATA-008 | Export performance metrics (CSV) | Must | 2 |
+| DATA-009 | Export audit logs (JSON) | Must | 2 |
+| DATA-010 | Export available within 24 hours | Must | 2 |
+| DATA-011 | Export included in all plans (no fees) | Must | 2 |
+
+### Deletion
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| DATA-012 | Soft delete with 30-day recovery window | Must | 1 |
+| DATA-013 | Hard delete after 30 days (automated) | Must | 1 |
+| DATA-014 | GDPR erasure request handling (30 day max) | Must | 1 |
+| DATA-015 | Disconnect ad accounts safely (revoke + delete tokens) | Must | 2 |
+| DATA-016 | Confirm deletion via email | Must | 1 |
+
+### Data Residency (MVP)
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| DATA-017 | Single region deployment (US) documented | Must | 1 |
+| DATA-018 | Data residency statement in privacy policy | Must | 1 |
+| DATA-019 | Future multi-region noted as V2+ consideration | Should | 1 |
+
+---
+
+## ADMIN: Internal Administration
+
+> Platform operator tooling (not user-facing).
+
+### Internal Roles
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| ADMIN-001 | Platform Admin role (full system access) | Must | 2 |
+| ADMIN-002 | Support Agent role (read tenant data, impersonate) | Must | 2 |
+| ADMIN-003 | Finance role (billing only) | Should | 3 |
+| ADMIN-004 | On-Call Engineer role (system metrics only) | Should | 3 |
+
+### Tenant Management
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| ADMIN-005 | Tenant search (email, org name, ID) | Must | 2 |
+| ADMIN-006 | Tenant detail view (subscription, usage) | Must | 2 |
+| ADMIN-007 | Tenant suspension | Must | 2 |
+| ADMIN-008 | Tenant unsuspension | Must | 2 |
+| ADMIN-009 | Two-person approval for tenant deletion | Should | 3 |
+
+### Support Impersonation
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| ADMIN-010 | Impersonate user action (explicit) | Must | 2 |
+| ADMIN-011 | Impersonation time limit (1 hour max) | Must | 2 |
+| ADMIN-012 | Impersonation audit log | Must | 2 |
+| ADMIN-013 | Visual indicator during impersonation | Must | 2 |
+| ADMIN-014 | Read-only impersonation by default | Should | 2 |
+
+### Usage Inspection
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| ADMIN-015 | AI usage by tenant (generations, cost) | Must | 2 |
+| ADMIN-016 | API usage by tenant | Should | 3 |
+| ADMIN-017 | Storage usage by tenant | Should | 3 |
+
+---
+
+## AI Boundaries (Non-Goals)
+
+> Explicit statements of what AI will NEVER do.
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| AI-013 | AI will NOT make autonomous budget changes | Must | 1 |
+| AI-014 | AI will NOT launch campaigns without human approval | Must | 1 |
+| AI-015 | AI will NOT make account-wide edits | Must | 1 |
+| AI-016 | AI will NOT access payment methods | Must | 1 |
+| AI-017 | AI will NOT delete campaigns without confirmation | Must | 1 |
+| AI-018 | AI output labeled as "AI-assisted" | Must | 1 |
+| AI-019 | AI prompt/input viewable by user | Should | 2 |
+
+---
+
+## AI Cost Controls
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| AI-020 | Monthly AI generation caps per plan | Must | 2 |
+| AI-021 | Hard stop when limit reached (Free, Starter) | Must | 2 |
+| AI-022 | Warn at 80% usage | Must | 2 |
+| AI-023 | Manual ad creation allowed when limit reached | Must | 2 |
+| AI-024 | AI usage visible in user dashboard | Must | 2 |
+| AI-025 | AI usage visible in admin panel | Must | 2 |
+| AI-026 | AI cost tracking per tenant (internal) | Must | 2 |
+| AI-027 | Monthly AI cost alerts to ops | Should | 2 |
+
+---
+
+## Ad Policy Pre-Validation
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| AI-028 | Forbidden terms scan before publish | Must | 3 |
+| AI-029 | Character limit validation per platform | Must | 3 |
+| AI-030 | Landing page URL reachability check | Must | 3 |
+| AI-031 | Landing page HTTPS required | Must | 3 |
+| AI-032 | Safe Browsing API check on URLs | Should | 3 |
+| AI-033 | Policy keyword warnings (not blocks) | Should | 3 |
+| AI-034 | Trademark scan with warnings | Could | 3 |
+
+---
+
+## Support Boundaries
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| PLAT-017 | Support tiers defined per plan | Must | 1 |
+| PLAT-018 | Response time targets documented | Must | 1 |
+| PLAT-019 | "Support will not do" list published | Must | 1 |
+| PLAT-020 | Status page for incidents | Must | 1 |
+| PLAT-021 | Incident communication process defined | Must | 1 |
+
+---
+
+## Threat Model Acknowledgment
+
+| REQ-ID | Requirement | Priority | Phase |
+|--------|-------------|----------|-------|
+| SEC-045 | Account takeover threat acknowledged and mitigated | Must | 1 |
+| SEC-046 | Token leakage threat acknowledged and mitigated | Must | 1 |
+| SEC-047 | Automation abuse threat acknowledged and mitigated | Must | 1 |
+| SEC-048 | Cross-tenant access threat acknowledged and mitigated | Must | 1 |
+| SEC-049 | AI prompt injection threat acknowledged and mitigated | Must | 1 |
+| SEC-050 | Insider threat acknowledged and mitigated | Must | 1 |
+| SEC-051 | Security review before launch | Must | 1 |
+| SEC-052 | Annual security review scheduled | Should | 1 |
 
 ---
 
@@ -329,47 +529,77 @@ These requirements ensure humans maintain control over automated actions:
 
 | Category | Must | Should | Could | Total |
 |----------|------|--------|-------|-------|
-| **SEC** | **41** | **3** | **0** | **44** |
+| **SEC** | **49** | **4** | **0** | **53** |
+| **PLAT** | **18** | **3** | **0** | **21** |
+| **DATA** | **17** | **2** | **0** | **19** |
+| **ADMIN** | **12** | **5** | **0** | **17** |
 | AUTH | 9 | 1 | 0 | 10 |
 | USER | 8 | 3 | 0 | 11 |
 | CAMP | 12 | 3 | 0 | 17 |
-| AI | 8 | 4 | 0 | 12 |
+| AI | 27 | 6 | 1 | 34 |
 | ANAL | 9 | 7 | 0 | 16 |
 | AUTO | 10 | 5 | 0 | 15 |
 | BILL | 7 | 5 | 0 | 12 |
 | INTG | 6 | 6 | 2 | 14 |
 | NOTIF | 5 | 6 | 0 | 11 |
-| **Total** | **115** | **43** | **2** | **162** |
+| **Total** | **189** | **56** | **3** | **248** |
 
 ---
 
-## V1 Scope: 115 Must-Have Requirements
+## V1 Scope: 189 Must-Have Requirements
 
 Organized by build phase (from ARCHITECTURE.md):
 
-### Phase 1: Foundation (Weeks 1-3) - SECURITY FIRST
-- **SEC-001 to SEC-044 (Security foundations - DAY ONE)**
+### Phase 1: Foundation (Weeks 1-3) - SECURITY & PLATFORM FIRST
+
+**Security (SEC-001 to SEC-052):**
+- All security foundations from Day One
+- Threat model acknowledgments
+- Security review before launch
+
+**Platform (PLAT-001 to PLAT-006, PLAT-012, PLAT-013, PLAT-015, PLAT-017 to PLAT-021):**
+- Observability stack (Prometheus, Grafana, Loki, Sentry)
+- Job management (retry, dead letter queue)
+- Support boundaries documented
+
+**Data (DATA-001 to DATA-006, DATA-012 to DATA-014, DATA-016 to DATA-018):**
+- Retention policies defined
+- Deletion workflows
+- Data residency documented
+
+**Auth & User:**
 - AUTH-001 to AUTH-010 (Authentication)
 - USER-001 to USER-011 (User Management)
 
-**Security Checklist for Phase 1:**
+**AI Non-Goals (AI-013 to AI-018):**
+- Explicit AI boundaries from Day One
+
+**Phase 1 Checklist:**
 ```
-[ ] TLS 1.3 configured
-[ ] Database encryption at rest enabled
-[ ] Secrets in environment variables
-[ ] Input validation middleware active
-[ ] Rate limiting configured
-[ ] Secure headers middleware
-[ ] Password hashing with Argon2id
-[ ] Session security (HttpOnly, Secure, SameSite)
-[ ] Firewall rules configured
-[ ] Database not publicly accessible
-[ ] Backup automation running
-[ ] Privacy policy published
-[ ] Security logging enabled
+[ ] Security stack configured (TLS, encryption, headers, rate limiting)
+[ ] Observability running (metrics, logs, errors, uptime)
+[ ] Job infrastructure with dead letter handling
+[ ] Data retention policies documented
+[ ] Privacy policy and ToS published
+[ ] Support tiers documented
+[ ] Threat model reviewed
+[ ] AI non-goals documented in UI/docs
 ```
 
 ### Phase 2: OAuth + Connections (Weeks 4-6)
+
+**Platform:**
+- PLAT-007 to PLAT-011 (Connector health)
+- PLAT-014, PLAT-016 (Job management UI)
+
+**Data:**
+- DATA-007 to DATA-011 (Export capabilities)
+- DATA-015 (Safe disconnect)
+
+**Admin:**
+- ADMIN-001 to ADMIN-015 (Internal admin tooling)
+
+**Campaigns:**
 - CAMP-001 to CAMP-006 (Ad Account Connections)
 - INTG-001 to INTG-003 (Platform APIs)
 

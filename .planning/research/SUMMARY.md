@@ -5,9 +5,27 @@
 
 ---
 
+## Platform Foundations (Before Code)
+
+> **See PLATFORM.md for full details on these decisions.**
+
+| Area | Decision |
+|------|----------|
+| **Data Ownership** | Tenant owns campaign data; platform owns logs; explicit retention periods |
+| **Data Residency** | Single region MVP (US); multi-region V2+ |
+| **Observability** | Prometheus + Grafana + Loki + Sentry from Day One |
+| **AI Non-Goals** | No autonomous budget/launch/delete; human-in-the-loop required |
+| **AI Cost Controls** | Monthly caps per plan; hard stop on Free/Starter |
+| **Admin Tooling** | Internal roles, tenant suspension, support impersonation |
+| **Exit Paths** | Safe disconnect, full export, 30-day deletion |
+| **Support Boundaries** | Tiers per plan; explicit "will not do" list |
+| **Threat Model** | Account takeover, token leakage, automation abuse acknowledged |
+
+---
+
 ## Security First (Day One)
 
-> **41 security requirements must be implemented before first deploy.**
+> **53 security requirements must be implemented before first deploy.**
 
 | Category | Requirements |
 |----------|--------------|
@@ -16,6 +34,7 @@
 | Auth Security | Argon2id hashing, secure sessions, JWT short expiry |
 | Infrastructure | Firewall, DB not public, encrypted backups |
 | Compliance | Privacy policy, GDPR (consent, deletion, export) |
+| Threat Model | 6 primary threats acknowledged with mitigations |
 
 ---
 
