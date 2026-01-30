@@ -107,6 +107,17 @@ class Settings(BaseSettings):
     rate_limit_ai: str = Field(
         default="10/minute", description="AI endpoint rate limit"
     )
+    rate_limit_export: str = Field(
+        default="5/minute", description="Export endpoint rate limit"
+    )
+
+    # =========================================================================
+    # Cache Settings
+    # =========================================================================
+    cache_ttl_short: int = Field(default=30, description="Short cache TTL in seconds")
+    cache_ttl_medium: int = Field(default=300, description="Medium cache TTL (5 min)")
+    cache_ttl_long: int = Field(default=1800, description="Long cache TTL (30 min)")
+    cache_enabled: bool = Field(default=True, description="Enable Redis caching")
 
     # =========================================================================
     # Email (Resend)
@@ -154,6 +165,18 @@ class Settings(BaseSettings):
     ai_default_model: str = Field(
         default="gpt-4o-mini", description="Default AI model"
     )
+    ai_fallback_model: str = Field(
+        default="claude-3-haiku-20240307", description="Fallback AI model"
+    )
+    ai_max_tokens: int = Field(default=2048, description="Max tokens for AI responses")
+    ai_temperature: float = Field(default=0.7, description="AI temperature for creativity")
+    ai_timeout_seconds: int = Field(default=30, description="AI request timeout")
+    ai_max_retries: int = Field(default=2, description="Max retries for AI requests")
+
+    # AI Usage Limits (per month, per organization)
+    ai_free_tier_limit: int = Field(default=50, description="Free tier monthly generation limit")
+    ai_pro_tier_limit: int = Field(default=500, description="Pro tier monthly generation limit")
+    ai_enterprise_tier_limit: int = Field(default=5000, description="Enterprise tier monthly limit")
 
     # =========================================================================
     # Google SSO

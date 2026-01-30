@@ -13,40 +13,19 @@ from arq import cron
 from arq.connections import RedisSettings
 
 from app.config import settings
+from app.workers.token_refresh import refresh_tokens
+from app.workers.campaign_sync import (
+    sync_approved_campaigns,
+    sync_campaign_statuses,
+)
+from app.workers.metrics_sync import sync_all_metrics
+from app.workers.alerts_worker import check_all_alerts
+from app.workers.automation_worker import evaluate_automation_rules
 
 
 # =============================================================================
-# Job Functions
+# Job Functions (Placeholders for future implementation)
 # =============================================================================
-
-async def sync_account_metrics(ctx: dict, account_id: str) -> dict:
-    """
-    Sync metrics for a single ad account.
-
-    Called by scheduled job for each active account.
-    """
-    # TODO: Implement actual metrics sync
-    return {"status": "success", "account_id": account_id}
-
-
-async def refresh_tokens(ctx: dict) -> dict:
-    """
-    Check and refresh expiring OAuth tokens.
-
-    Runs every 5 minutes to ensure tokens don't expire.
-    """
-    # TODO: Implement token refresh logic
-    return {"status": "success", "refreshed": 0}
-
-
-async def evaluate_automation_rules(ctx: dict) -> dict:
-    """
-    Evaluate all active automation rules.
-
-    Runs every 5 minutes to check rule conditions.
-    """
-    # TODO: Implement rule evaluation
-    return {"status": "success", "rules_evaluated": 0}
 
 
 async def send_notification(
@@ -87,16 +66,6 @@ async def cleanup_dead_letters(ctx: dict) -> dict:
     return {"status": "success", "cleaned": 0}
 
 
-async def sync_all_active_accounts(ctx: dict) -> dict:
-    """
-    Trigger metrics sync for all active ad accounts.
-
-    Scheduled job that queues individual sync tasks.
-    """
-    # TODO: Query all active accounts and queue sync jobs
-    return {"status": "success", "queued": 0}
-
-
 async def send_daily_summaries(ctx: dict) -> dict:
     """
     Send daily performance summary notifications.
@@ -116,26 +85,37 @@ class WorkerSettings:
 
     # Available job functions
     functions = [
-        sync_account_metrics,
+        sync_all_metrics,
+        check_all_alerts,
         refresh_tokens,
         evaluate_automation_rules,
         send_notification,
         generate_report,
         cleanup_dead_letters,
-        sync_all_active_accounts,
         send_daily_summaries,
+        sync_approved_campaigns,
+        sync_campaign_statuses,
     ]
 
     # Scheduled jobs (cron)
     cron_jobs = [
         # Metrics sync every 15 minutes
-        cron(sync_all_active_accounts, minute={0, 15, 30, 45}),
+        cron(sync_all_metrics, minute={0, 15, 30, 45}),
+
+        # Alert checks every 15 minutes (after metrics sync)
+        cron(check_all_alerts, minute={5, 20, 35, 50}),
 
         # Token refresh check every 5 minutes
         cron(refresh_tokens, minute={0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55}),
 
         # Automation rules every 5 minutes
         cron(evaluate_automation_rules, minute={0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55}),
+
+        # Campaign sync: push approved campaigns every minute
+        cron(sync_approved_campaigns, minute=set(range(60))),
+
+        # Campaign sync: sync statuses every 10 minutes
+        cron(sync_campaign_statuses, minute={0, 10, 20, 30, 40, 50}),
 
         # Daily summaries at 6 AM UTC
         cron(send_daily_summaries, hour=6, minute=0),

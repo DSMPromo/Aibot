@@ -42,6 +42,19 @@ services:
       - DEBUG=${DEBUG:-false}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      # Rate limiting
+      - RATE_LIMIT_API=${RATE_LIMIT_API:-60/minute}
+      - RATE_LIMIT_AUTH=${RATE_LIMIT_AUTH:-5/minute}
+      - RATE_LIMIT_AI=${RATE_LIMIT_AI:-10/minute}
+      # Cache
+      - CACHE_ENABLED=${CACHE_ENABLED:-true}
+      # External services
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - SENTRY_DSN=${SENTRY_DSN:-}
     volumes:
       - ./backend:/app:ro
     depends_on:
@@ -72,6 +85,12 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production-use-openssl-rand-hex-32}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-me-in-production-use-fernet-key}
       - ENVIRONMENT=${ENVIRONMENT:-development}
+      # External services for background tasks
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - SENTRY_DSN=${SENTRY_DSN:-}
     volumes:
       - ./backend:/app:ro
     depends_on:
@@ -81,6 +100,10 @@ services:
         condition: service_healthy
     networks:
       - aimarketing
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   # PostgreSQL with TimescaleDB
   postgres:

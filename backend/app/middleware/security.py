@@ -5,13 +5,16 @@ Implements:
 - Secure HTTP headers (SEC-013, SEC-014)
 - Rate limiting (SEC-011, SEC-012)
 - Request logging (SEC-034)
+- Request ID tracking
 - CORS configuration
 
 SECURITY CRITICAL: Changes require security review.
 """
 
 import time
-from typing import Callable
+import uuid
+from contextvars import ContextVar
+from typing import Callable, Optional
 
 import secure
 import structlog
@@ -25,6 +28,14 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.config import settings
 
 logger = structlog.get_logger()
+
+# Context variable for request ID
+request_id_var: ContextVar[Optional[str]] = ContextVar("request_id", default=None)
+
+
+def get_request_id() -> Optional[str]:
+    """Get the current request ID from context."""
+    return request_id_var.get()
 
 
 # =============================================================================
@@ -110,6 +121,43 @@ secure_headers = secure.Secure(
 
 
 # =============================================================================
+# Request ID Middleware
+# =============================================================================
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware to generate and track request IDs.
+
+    Request IDs enable:
+    - Request tracing across services
+    - Log correlation
+    - Support debugging
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        # Check for existing request ID from upstream proxy
+        request_id = request.headers.get("X-Request-ID")
+
+        if not request_id:
+            # Generate new request ID
+            request_id = str(uuid.uuid4())[:8]  # Short ID for readability
+
+        # Set in context variable
+        request_id_var.set(request_id)
+
+        # Store on request state for access in endpoints
+        request.state.request_id = request_id
+
+        # Process request
+        response = await call_next(request)
+
+        # Add request ID to response headers
+        response.headers["X-Request-ID"] = request_id
+
+        return response
+
+
+# =============================================================================
 # Request Logging Middleware (SEC-034)
 # =============================================================================
 
@@ -118,6 +166,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     Middleware to log all requests for security auditing.
 
     Logs:
+    - Request ID
     - Request method and path
     - Client IP
     - Response status code
@@ -134,6 +183,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         method = request.method
         path = request.url.path
         user_agent = request.headers.get("User-Agent", "")
+        request_id = getattr(request.state, "request_id", None)
 
         # Process request
         response = await call_next(request)
@@ -142,9 +192,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         duration_ms = round((time.time() - start_time) * 1000, 2)
 
         # Log request (don't log health checks to reduce noise)
-        if path != "/health":
+        if path not in ("/health", "/health/live", "/metrics"):
             logger.info(
                 "request",
+                request_id=request_id,
                 method=method,
                 path=path,
                 status=response.status_code,
@@ -211,6 +262,9 @@ def setup_security_middleware(app: FastAPI) -> None:
 
     # Add request logging middleware
     app.add_middleware(RequestLoggingMiddleware)
+
+    # Add request ID middleware (should be first to run)
+    app.add_middleware(RequestIDMiddleware)
 
     logger.info(
         "security_middleware_configured",

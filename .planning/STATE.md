@@ -10,10 +10,10 @@
 
 | Metric | Status |
 |--------|--------|
-| **Current Phase** | 1 - Foundation |
-| **Current Week** | Week 1 |
-| **Overall Progress** | Phase 1 Complete |
-| **Next Milestone** | M2: Connected (Week 6) |
+| **Current Phase** | 2 - OAuth & Connections |
+| **Current Week** | Week 4-6 |
+| **Overall Progress** | Phase 2 Complete |
+| **Next Milestone** | M3: Campaign Management (Week 9) |
 
 ---
 
@@ -23,7 +23,7 @@
 |-------|--------|----------|-------|
 | Planning | Complete | 100% | All planning documents created |
 | Phase 1: Foundation | Complete | 100% | Infrastructure, backend, frontend shell |
-| Phase 2: OAuth | Not Started | 0% | - |
+| Phase 2: OAuth | Complete | 100% | OAuth infrastructure, Google Ads adapter, connections UI, token refresh worker |
 | Phase 3: Campaigns | Not Started | 0% | - |
 | Phase 4: AI | Not Started | 0% | - |
 | Phase 5: Analytics | Not Started | 0% | - |
@@ -56,20 +56,20 @@
 
 | Category | Must | Should | Could | Total | Done |
 |----------|------|--------|-------|-------|------|
-| SEC (Security) | 49 | 4 | 0 | 53 | 15 |
+| SEC (Security) | 49 | 4 | 0 | 53 | 18 |
 | PLAT (Platform Ops) | 18 | 3 | 0 | 21 | 6 |
-| DATA (Data Mgmt) | 17 | 2 | 0 | 19 | 0 |
+| DATA (Data Mgmt) | 17 | 2 | 0 | 19 | 2 |
 | ADMIN (Internal Admin) | 12 | 5 | 0 | 17 | 0 |
 | AUTH (Authentication) | 9 | 1 | 0 | 10 | 8 |
 | USER (User Mgmt) | 8 | 3 | 0 | 11 | 6 |
-| CAMP (Campaigns) | 12 | 3 | 0 | 17 | 0 |
+| CAMP (Campaigns) | 12 | 3 | 0 | 17 | 6 |
 | AI (AI Features) | 27 | 6 | 1 | 34 | 0 |
 | ANAL (Analytics) | 9 | 7 | 0 | 16 | 0 |
 | AUTO (Automation) | 10 | 5 | 0 | 15 | 0 |
 | BILL (Billing) | 7 | 5 | 0 | 12 | 0 |
-| INTG (Integrations) | 6 | 6 | 2 | 14 | 0 |
+| INTG (Integrations) | 6 | 6 | 2 | 14 | 4 |
 | NOTIF (Notifications) | 5 | 6 | 0 | 11 | 0 |
-| **Total** | **189** | **56** | **3** | **248** | **35** |
+| **Total** | **189** | **56** | **3** | **248** | **50** |
 
 ---
 
@@ -166,6 +166,42 @@
 - `/infrastructure/` - Docker and config files
 - `docker-compose.yml` - Full dev environment
 
+### Weeks 4-6 (Phase 2: OAuth & Connections)
+
+**Completed:**
+- [x] OAuth infrastructure with AuthLib
+- [x] OAuth state management with CSRF protection
+- [x] Token encryption at rest (Fernet)
+- [x] Google Ads OAuth provider configuration
+- [x] Meta and TikTok OAuth provider configurations (ready for use)
+- [x] Token exchange and refresh logic
+- [x] Ad account database model with encrypted token storage
+- [x] Ad account sync log model
+- [x] Connections API endpoints (connect, callback, list, disconnect, sync, refresh)
+- [x] Ad platform adapter pattern (abstract base class)
+- [x] Google Ads adapter implementation (full CRUD + metrics)
+- [x] Adapter factory pattern
+- [x] Settings layout and navigation UI
+- [x] Connections page with platform cards
+- [x] Connected account management UI (sync, disconnect, refresh)
+- [x] OAuth callback handling page
+- [x] Profile, Security, Billing settings pages
+- [x] Connections store (Zustand)
+- [x] Connections API client
+- [x] Token refresh background worker
+- [x] Automatic token refresh (every 5 minutes)
+- [x] Consecutive failure tracking
+- [x] Auto-mark accounts for re-auth after failures
+
+**Code Artifacts:**
+- `/backend/app/core/oauth.py` - OAuth infrastructure
+- `/backend/app/models/ad_account.py` - Ad account models
+- `/backend/app/api/v1/connections.py` - Connections API
+- `/backend/app/adapters/` - Ad platform adapters
+- `/backend/app/workers/token_refresh.py` - Token refresh worker
+- `/frontend/src/features/settings/` - Settings UI pages
+- `/frontend/src/stores/connections.ts` - Connections state
+
 ---
 
 ## Next Actions
@@ -177,12 +213,13 @@
    - [ ] Register domain
    - [ ] Provision Hostinger VPS (Ubuntu 24.04 LTS)
 
-2. **Phase 2: OAuth (Weeks 4-6):**
-   - [ ] Implement AuthLib for OAuth flows
-   - [ ] Google Ads OAuth connection
-   - [ ] Token encryption and refresh
-   - [ ] Ad account listing UI
-   - [ ] Admin panel for tenant management
+2. **Phase 3: Campaign Management (Weeks 7-9):**
+   - [ ] Campaign database models
+   - [ ] Campaign CRUD API endpoints
+   - [ ] Campaign list/detail UI
+   - [ ] Campaign creation wizard
+   - [ ] Budget management
+   - [ ] Platform sync integration
 
 ---
 
@@ -208,6 +245,7 @@
 | 2026-01-29 | Initial STATE.md created | Claude |
 | 2026-01-29 | Planning phase completed | Claude |
 | 2026-01-29 | Phase 1 completed - infrastructure, backend, frontend | Claude |
+| 2026-01-29 | Phase 2 completed - OAuth, adapters, connections UI, token refresh | Claude |
 
 ---
 

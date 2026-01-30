@@ -4,6 +4,8 @@ AI Marketing Platform - FastAPI Application Entry Point
 This is the main application file that configures and runs the FastAPI server.
 """
 
+import asyncio
+import signal
 import structlog
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
@@ -16,6 +18,21 @@ from prometheus_client import make_asgi_app
 from app.config import settings
 from app.core.database import close_db, init_db
 from app.middleware.security import setup_security_middleware
+from app.services.cache_service import init_redis, close_redis
+
+
+# =============================================================================
+# Graceful Shutdown Handler
+# =============================================================================
+
+shutdown_event = asyncio.Event()
+
+
+def handle_shutdown_signal(sig: signal.Signals) -> None:
+    """Handle shutdown signals for graceful termination."""
+    logger = structlog.get_logger()
+    logger.info("shutdown_signal_received", signal=sig.name)
+    shutdown_event.set()
 
 # Configure structured logging
 structlog.configure(
@@ -71,15 +88,37 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         environment=settings.environment,
     )
 
+    # Register signal handlers for graceful shutdown
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, handle_shutdown_signal, sig)
+    logger.info("signal_handlers_registered")
+
     # Initialize database connection pool
     # Note: In production, use Alembic migrations instead of init_db()
     # await init_db()
     logger.info("database_connected")
 
+    # Initialize Redis cache
+    try:
+        await init_redis()
+        logger.info("redis_cache_initialized")
+    except Exception as e:
+        logger.warning("redis_cache_init_failed", error=str(e))
+        # Continue without cache in degraded mode
+
     yield
 
     # Shutdown
     logger.info("application_shutting_down")
+
+    # Close Redis connection
+    try:
+        await close_redis()
+        logger.info("redis_cache_closed")
+    except Exception:
+        pass
+
     await close_db()
     logger.info("database_disconnected")
 
@@ -140,6 +179,7 @@ async def readiness_check():
     - Database connectivity
     - Redis connectivity
     """
+    from sqlalchemy import text
     from app.core.database import engine
     import redis.asyncio as redis
 
@@ -151,7 +191,7 @@ async def readiness_check():
     # Check database
     try:
         async with engine.connect() as conn:
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
         checks["database"] = True
     except Exception as e:
         logger.error("database_health_check_failed", error=str(e))
@@ -171,6 +211,62 @@ async def readiness_check():
     return {
         "status": "ready" if all_healthy else "degraded",
         "checks": checks,
+    }
+
+
+@app.get("/status", tags=["Health"])
+async def status_page():
+    """
+    Public status endpoint for status page integration.
+
+    Returns system status and component health.
+    """
+    from sqlalchemy import text
+    from app.core.database import engine
+    import redis.asyncio as redis
+
+    components = []
+
+    # Database status
+    db_status = "operational"
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "degraded"
+
+    components.append({
+        "name": "Database",
+        "status": db_status,
+    })
+
+    # Redis status
+    redis_status = "operational"
+    try:
+        redis_client = redis.from_url(settings.redis_url)
+        await redis_client.ping()
+        await redis_client.close()
+    except Exception:
+        redis_status = "degraded"
+
+    components.append({
+        "name": "Cache",
+        "status": redis_status,
+    })
+
+    # API status (if we got here, API is working)
+    components.append({
+        "name": "API",
+        "status": "operational",
+    })
+
+    # Overall status
+    all_operational = all(c["status"] == "operational" for c in components)
+
+    return {
+        "status": "operational" if all_operational else "degraded",
+        "version": settings.app_version,
+        "components": components,
     }
 
 

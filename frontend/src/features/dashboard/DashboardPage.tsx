@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -5,93 +7,309 @@ import {
   Eye,
   MousePointerClick,
   Target,
+  TrendingUp,
+  RefreshCw,
+  Calendar,
+  Loader2,
+  Download,
+  FileText,
+  FileSpreadsheet,
 } from 'lucide-react'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts'
+import { format, subDays } from 'date-fns'
 
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn, formatCurrency, formatCompactNumber } from '@/lib/utils'
+import {
+  analyticsApi,
+  exportsApi,
+  downloadBlob,
+  type MetricsComparison,
+  type CampaignMetricsList,
+  type TimeSeriesData,
+  type PlatformComparisonResponse,
+} from '@/lib/api'
+import {
+  BarChart,
+  Bar,
+  Cell,
+  PieChart,
+  Pie,
+} from 'recharts'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-// Mock data - will be replaced with real API calls
-const stats = [
-  {
-    name: 'Total Spend',
-    value: 12560.5,
-    change: 12.5,
-    changeType: 'increase' as const,
-    icon: DollarSign,
-    format: 'currency' as const,
-  },
-  {
-    name: 'Impressions',
-    value: 2450000,
-    change: 8.2,
-    changeType: 'increase' as const,
-    icon: Eye,
-    format: 'compact' as const,
-  },
-  {
-    name: 'Clicks',
-    value: 48500,
-    change: -3.1,
-    changeType: 'decrease' as const,
-    icon: MousePointerClick,
-    format: 'compact' as const,
-  },
-  {
-    name: 'Conversions',
-    value: 1250,
-    change: 15.3,
-    changeType: 'increase' as const,
-    icon: Target,
-    format: 'compact' as const,
-  },
+type DateRange = '7d' | '14d' | '30d' | '90d'
+
+const dateRangeOptions: { value: DateRange; label: string }[] = [
+  { value: '7d', label: 'Last 7 days' },
+  { value: '14d', label: 'Last 14 days' },
+  { value: '30d', label: 'Last 30 days' },
+  { value: '90d', label: 'Last 90 days' },
 ]
 
-const campaigns = [
-  {
-    id: 1,
-    name: 'Summer Sale 2026',
-    platform: 'Google',
-    status: 'active',
-    spend: 2340.5,
-    impressions: 450000,
-    clicks: 8500,
-    conversions: 245,
-  },
-  {
-    id: 2,
-    name: 'Brand Awareness',
-    platform: 'Meta',
-    status: 'active',
-    spend: 1890.0,
-    impressions: 680000,
-    clicks: 12300,
-    conversions: 180,
-  },
-  {
-    id: 3,
-    name: 'Product Launch',
-    platform: 'TikTok',
-    status: 'paused',
-    spend: 980.25,
-    impressions: 320000,
-    clicks: 5600,
-    conversions: 95,
-  },
-]
+function getDateRangeDates(range: DateRange) {
+  const end = new Date()
+  const days = parseInt(range.replace('d', ''))
+  const start = subDays(end, days)
+  return {
+    start_date: format(start, 'yyyy-MM-dd'),
+    end_date: format(end, 'yyyy-MM-dd'),
+  }
+}
 
 export default function DashboardPage() {
+  const navigate = useNavigate()
+  const [dateRange, setDateRange] = useState<DateRange>('30d')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const [overview, setOverview] = useState<MetricsComparison | null>(null)
+  const [campaigns, setCampaigns] = useState<CampaignMetricsList | null>(null)
+  const [timeSeries, setTimeSeries] = useState<TimeSeriesData | null>(null)
+  const [platformComparison, setPlatformComparison] = useState<PlatformComparisonResponse | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
+
+  const handleExport = async (type: 'csv-overview' | 'csv-campaigns' | 'csv-timeseries' | 'pdf') => {
+    setIsExporting(true)
+    const dates = getDateRangeDates(dateRange)
+
+    try {
+      let blob: Blob
+      let filename: string
+
+      switch (type) {
+        case 'csv-overview':
+          blob = await exportsApi.downloadOverviewCsv(dates)
+          filename = `overview_${dates.start_date}_${dates.end_date}.csv`
+          break
+        case 'csv-campaigns':
+          blob = await exportsApi.downloadCampaignsCsv(dates)
+          filename = `campaigns_${dates.start_date}_${dates.end_date}.csv`
+          break
+        case 'csv-timeseries':
+          blob = await exportsApi.downloadTimeseriesCsv({ ...dates, granularity: 'daily' })
+          filename = `timeseries_${dates.start_date}_${dates.end_date}.csv`
+          break
+        case 'pdf':
+          blob = await exportsApi.downloadPdfReport({
+            ...dates,
+            title: 'Analytics Report',
+          })
+          filename = `report_${dates.start_date}_${dates.end_date}.pdf`
+          break
+      }
+
+      downloadBlob(blob, filename)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to export')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const loadData = async (showLoading = true) => {
+    if (showLoading) setIsLoading(true)
+    else setIsRefreshing(true)
+
+    setError(null)
+
+    const dates = getDateRangeDates(dateRange)
+
+    try {
+      const [overviewData, campaignsData, timeSeriesData, platformData] = await Promise.all([
+        analyticsApi.getOverview({
+          ...dates,
+          compare_previous: true,
+        }),
+        analyticsApi.getCampaignsList({
+          ...dates,
+          page_size: 10,
+        }),
+        analyticsApi.getTimeSeries({
+          ...dates,
+          granularity: dateRange === '7d' ? 'daily' : 'daily',
+        }),
+        analyticsApi.getPlatformComparison(dates),
+      ])
+
+      setOverview(overviewData)
+      setCampaigns(campaignsData)
+      setTimeSeries(timeSeriesData)
+      setPlatformComparison(platformData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load analytics data')
+    } finally {
+      setIsLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [dateRange])
+
+  const stats = overview
+    ? [
+        {
+          name: 'Total Spend',
+          value: overview.current.spend,
+          change: overview.change_percent.spend,
+          icon: DollarSign,
+          format: 'currency' as const,
+        },
+        {
+          name: 'Impressions',
+          value: overview.current.impressions,
+          change: overview.change_percent.impressions,
+          icon: Eye,
+          format: 'compact' as const,
+        },
+        {
+          name: 'Clicks',
+          value: overview.current.clicks,
+          change: overview.change_percent.clicks,
+          icon: MousePointerClick,
+          format: 'compact' as const,
+        },
+        {
+          name: 'Conversions',
+          value: overview.current.conversions,
+          change: overview.change_percent.conversions,
+          icon: Target,
+          format: 'compact' as const,
+        },
+        {
+          name: 'CTR',
+          value: overview.current.ctr,
+          change: overview.change_percent.ctr,
+          icon: TrendingUp,
+          format: 'percent' as const,
+        },
+        {
+          name: 'ROAS',
+          value: overview.current.roas,
+          change: overview.change_percent.roas,
+          icon: DollarSign,
+          format: 'roas' as const,
+        },
+      ]
+    : []
+
+  const chartData = timeSeries?.data.map((point) => ({
+    date: format(new Date(point.timestamp), 'MMM d'),
+    spend: point.spend,
+    impressions: point.impressions,
+    clicks: point.clicks,
+    conversions: point.conversions,
+  })) || []
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 gap-4">
+        <p className="text-destructive">{error}</p>
+        <Button onClick={() => loadData()}>Retry</Button>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your advertising performance
-        </p>
+      {/* Page header with controls */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Overview of your advertising performance
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Date range selector */}
+          <div className="flex items-center gap-1 rounded-lg border bg-background p-1">
+            {dateRangeOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setDateRange(option.value)}
+                className={cn(
+                  'px-3 py-1.5 text-sm rounded-md transition-colors',
+                  dateRange === option.value
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Export dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" disabled={isExporting}>
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('csv-overview')}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Overview CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('csv-campaigns')}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Campaigns CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('csv-timeseries')}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Time Series CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                <FileText className="h-4 w-4 mr-2" />
+                Full Report (PDF)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => loadData(false)}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
+          </Button>
+        </div>
       </div>
 
       {/* Stats grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         {stats.map((stat) => (
           <Card key={stat.name}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -102,34 +320,169 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {stat.format === 'currency'
-                  ? formatCurrency(stat.value)
-                  : formatCompactNumber(stat.value)}
+                {stat.format === 'currency' && formatCurrency(stat.value)}
+                {stat.format === 'compact' && formatCompactNumber(stat.value)}
+                {stat.format === 'percent' && `${stat.value.toFixed(2)}%`}
+                {stat.format === 'roas' && `${stat.value.toFixed(2)}x`}
               </div>
-              <p
-                className={cn(
-                  'text-xs flex items-center gap-1',
-                  stat.changeType === 'increase'
-                    ? 'text-green-600'
-                    : 'text-red-600'
-                )}
-              >
-                {stat.changeType === 'increase' ? (
-                  <ArrowUpRight className="h-3 w-3" />
-                ) : (
-                  <ArrowDownRight className="h-3 w-3" />
-                )}
-                {Math.abs(stat.change)}% from last month
-              </p>
+              {stat.change !== null && stat.change !== undefined && (
+                <p
+                  className={cn(
+                    'text-xs flex items-center gap-1',
+                    stat.change >= 0 ? 'text-green-600' : 'text-red-600'
+                  )}
+                >
+                  {stat.change >= 0 ? (
+                    <ArrowUpRight className="h-3 w-3" />
+                  ) : (
+                    <ArrowDownRight className="h-3 w-3" />
+                  )}
+                  {Math.abs(stat.change).toFixed(1)}% vs prev period
+                </p>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Campaigns table */}
+      {/* Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Active Campaigns</CardTitle>
+          <CardTitle>Performance Over Time</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="date"
+                  className="text-xs text-muted-foreground"
+                  tick={{ fill: 'currentColor' }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  className="text-xs text-muted-foreground"
+                  tick={{ fill: 'currentColor' }}
+                  tickFormatter={(value) => formatCompactNumber(value)}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  className="text-xs text-muted-foreground"
+                  tick={{ fill: 'currentColor' }}
+                  tickFormatter={(value) => `$${formatCompactNumber(value)}`}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
+                  formatter={(value: number, name: string) => {
+                    if (name === 'spend') return [formatCurrency(value), 'Spend']
+                    return [formatCompactNumber(value), name.charAt(0).toUpperCase() + name.slice(1)]
+                  }}
+                />
+                <Legend />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="impressions"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="clicks"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="spend"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Platform Comparison */}
+      {platformComparison && Object.keys(platformComparison.platforms).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Platform Performance Comparison</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {Object.entries(platformComparison.platforms).map(([platform, metrics]) => {
+                const platformConfig = {
+                  google: { color: '#4285F4', name: 'Google Ads' },
+                  meta: { color: '#0668E1', name: 'Meta Ads' },
+                  tiktok: { color: '#000000', name: 'TikTok Ads' },
+                }[platform] || { color: '#888', name: platform }
+
+                return (
+                  <div
+                    key={platform}
+                    className="p-4 rounded-lg border"
+                    style={{ borderLeftColor: platformConfig.color, borderLeftWidth: 4 }}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-semibold">{platformConfig.name}</h4>
+                      <span className="text-sm text-muted-foreground">
+                        {metrics.spend_share.toFixed(1)}% of spend
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Spend</p>
+                        <p className="font-medium">{formatCurrency(metrics.spend)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">ROAS</p>
+                        <p className="font-medium">{metrics.roas.toFixed(2)}x</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Conversions</p>
+                        <p className="font-medium">{formatCompactNumber(metrics.conversions)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">CPA</p>
+                        <p className="font-medium">{formatCurrency(metrics.cpa)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">CTR</p>
+                        <p className="font-medium">{metrics.ctr.toFixed(2)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Campaigns</p>
+                        <p className="font-medium">{metrics.campaign_count}</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Campaigns table */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Campaign Performance</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => navigate('/campaigns')}>
+            View All
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -142,52 +495,66 @@ export default function DashboardPage() {
                   <th className="pb-3 font-medium text-right">Spend</th>
                   <th className="pb-3 font-medium text-right">Impressions</th>
                   <th className="pb-3 font-medium text-right">Clicks</th>
+                  <th className="pb-3 font-medium text-right">CTR</th>
                   <th className="pb-3 font-medium text-right">Conversions</th>
+                  <th className="pb-3 font-medium text-right">ROAS</th>
                 </tr>
               </thead>
               <tbody>
-                {campaigns.map((campaign) => (
-                  <tr key={campaign.id} className="border-b last:border-0">
-                    <td className="py-3 font-medium">{campaign.name}</td>
+                {campaigns?.campaigns.map((campaign) => (
+                  <tr
+                    key={campaign.campaign_id}
+                    className="border-b last:border-0 cursor-pointer hover:bg-muted/50"
+                    onClick={() => navigate(`/campaigns/${campaign.campaign_id}`)}
+                  >
+                    <td className="py-3 font-medium">{campaign.campaign_name}</td>
                     <td className="py-3">
                       <span
                         className={cn(
                           'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
-                          campaign.platform === 'Google' &&
-                            'bg-blue-100 text-blue-700',
-                          campaign.platform === 'Meta' &&
-                            'bg-indigo-100 text-indigo-700',
-                          campaign.platform === 'TikTok' &&
-                            'bg-pink-100 text-pink-700'
+                          campaign.platform === 'google' && 'bg-blue-100 text-blue-700',
+                          campaign.platform === 'meta' && 'bg-indigo-100 text-indigo-700',
+                          campaign.platform === 'tiktok' && 'bg-pink-100 text-pink-700'
                         )}
                       >
-                        {campaign.platform}
+                        {campaign.platform.charAt(0).toUpperCase() + campaign.platform.slice(1)}
                       </span>
                     </td>
                     <td className="py-3">
                       <span
                         className={cn(
                           'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
-                          campaign.status === 'active'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-yellow-100 text-yellow-700'
+                          campaign.status === 'active' && 'bg-green-100 text-green-700',
+                          campaign.status === 'paused' && 'bg-yellow-100 text-yellow-700',
+                          campaign.status === 'draft' && 'bg-gray-100 text-gray-700'
                         )}
                       >
                         {campaign.status}
                       </span>
                     </td>
                     <td className="py-3 text-right">
-                      {formatCurrency(campaign.spend)}
+                      {formatCurrency(campaign.metrics.spend)}
                     </td>
                     <td className="py-3 text-right">
-                      {formatCompactNumber(campaign.impressions)}
+                      {formatCompactNumber(campaign.metrics.impressions)}
                     </td>
                     <td className="py-3 text-right">
-                      {formatCompactNumber(campaign.clicks)}
+                      {formatCompactNumber(campaign.metrics.clicks)}
                     </td>
-                    <td className="py-3 text-right">{campaign.conversions}</td>
+                    <td className="py-3 text-right">
+                      {campaign.metrics.ctr.toFixed(2)}%
+                    </td>
+                    <td className="py-3 text-right">{campaign.metrics.conversions}</td>
+                    <td className="py-3 text-right">{campaign.metrics.roas.toFixed(2)}x</td>
                   </tr>
                 ))}
+                {(!campaigns || campaigns.campaigns.length === 0) && (
+                  <tr>
+                    <td colSpan={9} className="py-8 text-center text-muted-foreground">
+                      No campaigns found. Create your first campaign to see metrics.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -196,7 +563,10 @@ export default function DashboardPage() {
 
       {/* Quick actions */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="cursor-pointer hover:border-primary transition-colors">
+        <Card
+          className="cursor-pointer hover:border-primary transition-colors"
+          onClick={() => navigate('/campaigns/new')}
+        >
           <CardContent className="flex items-center gap-4 p-6">
             <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
               <Target className="h-6 w-6 text-blue-600" />
@@ -210,7 +580,10 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:border-primary transition-colors">
+        <Card
+          className="cursor-pointer hover:border-primary transition-colors"
+          onClick={() => navigate('/settings/connections')}
+        >
           <CardContent className="flex items-center gap-4 p-6">
             <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
               <svg
@@ -237,20 +610,12 @@ export default function DashboardPage() {
         <Card className="cursor-pointer hover:border-primary transition-colors">
           <CardContent className="flex items-center gap-4 p-6">
             <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-              <svg
-                className="h-6 w-6 text-green-600"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-              </svg>
+              <Calendar className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <h3 className="font-semibold">Generate Ad Copy</h3>
+              <h3 className="font-semibold">Schedule Report</h3>
               <p className="text-sm text-muted-foreground">
-                Use AI to create content
+                Set up automated reports
               </p>
             </div>
           </CardContent>
