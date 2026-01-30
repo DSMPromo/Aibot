@@ -91,18 +91,14 @@ export default {
         },
       },
       boxShadow: {
-        tremor: {
-          input: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-          card: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-          dropdown: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-        },
+        "tremor-input": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "tremor-card": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+        "tremor-dropdown": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
       },
       fontSize: {
-        tremor: {
-          default: ["0.875rem", { lineHeight: "1.25rem" }],
-          title: ["1.125rem", { lineHeight: "1.75rem" }],
-          metric: ["1.875rem", { lineHeight: "2.25rem" }],
-        },
+        "tremor-default": ["0.875rem", { lineHeight: "1.25rem" }],
+        "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
+        "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
       },
       keyframes: {
         "accordion-down": {
