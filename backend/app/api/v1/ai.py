@@ -125,7 +125,7 @@ async def get_usage_limits(
     - Whether hard limit is reached
     """
     # TODO: Get current user's org_id and plan_tier
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
     plan_tier = "free"
 
     status = await get_usage_status(db, org_id, plan_tier)
@@ -156,7 +156,7 @@ async def get_usage_statistics(
     Returns breakdown by generation type and model.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     stats = await get_usage_stats(db, org_id, year, month)
 
@@ -189,8 +189,8 @@ async def generate_headline_variations(
     All outputs are labeled as AI-assisted.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     try:
         response, result = await generate_headlines(
@@ -254,8 +254,8 @@ async def generate_description_variations(
     All outputs are labeled as AI-assisted.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     try:
         response, result = await generate_descriptions(
@@ -318,8 +318,8 @@ async def generate_cta_suggestions(
     All outputs are labeled as AI-assisted.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     try:
         response, result = await generate_ctas(
@@ -383,8 +383,8 @@ async def generate_full_ad_copy_variations(
     Rate limited to 5 per minute.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     try:
         response, result = await generate_full_ad_copy(

@@ -256,7 +256,7 @@ async def list_rules(
 ):
     """List automation rules."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     rules, total = await get_rules(
@@ -306,8 +306,8 @@ async def create_new_rule(
 ):
     """Create a new automation rule."""
     # TODO: Get current user's org_id and user_id from auth
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     # Validate scope
     if request.scope_type == "campaign" and not request.campaign_id:
@@ -374,7 +374,7 @@ async def get_single_rule(
 ):
     """Get a specific rule."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     rule = await get_rule(db, rule_id, org_id)
     if not rule:
@@ -416,7 +416,7 @@ async def update_existing_rule(
 ):
     """Update a rule."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     rule = await get_rule(db, rule_id, org_id)
     if not rule:
@@ -470,7 +470,7 @@ async def delete_existing_rule(
 ):
     """Delete a rule."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     rule = await get_rule(db, rule_id, org_id)
     if not rule:
@@ -489,7 +489,7 @@ async def activate_rule(
 ):
     """Activate a rule."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     rule = await get_rule(db, rule_id, org_id)
     if not rule:
@@ -532,7 +532,7 @@ async def pause_rule(
 ):
     """Pause a rule."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     rule = await get_rule(db, rule_id, org_id)
     if not rule:
@@ -576,7 +576,7 @@ async def evaluate_single_rule(
 ):
     """Evaluate a rule without executing actions."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     rule = await get_rule(db, rule_id, org_id)
     if not rule:
@@ -614,7 +614,7 @@ async def run_rule_now(
 ):
     """Manually run a rule (evaluate and execute if triggered)."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     rule = await get_rule(db, rule_id, org_id)
     if not rule:
@@ -661,7 +661,7 @@ async def list_executions(
 ):
     """List rule executions."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     executions, total = await get_rule_executions(
@@ -706,7 +706,7 @@ async def list_pending_actions(
 ):
     """List pending actions."""
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     actions, total = await get_pending_actions(
@@ -747,8 +747,8 @@ async def approve_action(
 ):
     """Approve a pending action."""
     # TODO: Get current user's org_id and user_id from auth
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     from sqlalchemy import select
     from app.models.automation import PendingAction
@@ -783,8 +783,8 @@ async def reject_action(
 ):
     """Reject a pending action."""
     # TODO: Get current user's org_id and user_id from auth
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     from sqlalchemy import select
     from app.models.automation import PendingAction
@@ -846,8 +846,8 @@ async def create_rule_from_template_endpoint(
 ):
     """Create a rule from a template."""
     # TODO: Get current user's org_id and user_id from auth
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     rule = await create_rule_from_template(
         db=db,

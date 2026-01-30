@@ -136,7 +136,7 @@ async def register(request: Request, data: RegisterRequest):
 
     return RegisterResponse(
         message="Registration successful. Please check your email to verify your account.",
-        user_id="placeholder-user-id",
+        user_id="00000000-0000-0000-0000-000000000002",
     )
 
 
@@ -170,8 +170,8 @@ async def login(request: Request, data: LoginRequest):
 
     # Placeholder response
     access_token, refresh_token = create_token_pair(
-        user_id="placeholder-user-id",
-        org_id="placeholder-org-id",
+        user_id="00000000-0000-0000-0000-000000000002",
+        org_id="00000000-0000-0000-0000-000000000001",
         role="admin",
     )
 
@@ -186,7 +186,7 @@ async def login(request: Request, data: LoginRequest):
         refresh_token=refresh_token,
         expires_in=settings.jwt_access_token_expire_minutes * 60,
         user={
-            "id": "placeholder-user-id",
+            "id": "00000000-0000-0000-0000-000000000002",
             "email": data.email,
             "name": "Placeholder User",
             "role": "admin",

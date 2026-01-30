@@ -103,7 +103,7 @@ async def export_overview_metrics_csv(
     Returns a CSV file with aggregated metrics for the specified date range.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     # Parse metrics list
     metric_list = metrics.split(",") if metrics else None
@@ -146,7 +146,7 @@ async def export_campaign_metrics_csv(
     Returns a CSV file with per-campaign metrics for the specified date range.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     # Parse metrics list
     metric_list = metrics.split(",") if metrics else None
@@ -189,7 +189,7 @@ async def export_time_series_csv(
     Returns a CSV file with time series data for the specified date range and granularity.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         result = await export_timeseries_csv(
@@ -234,7 +234,7 @@ async def export_full_pdf_report(
     Returns a PDF file with overview metrics, campaign breakdown, and time series summary.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     # Parse metrics list
     metric_list = metrics.split(",") if metrics else None
@@ -278,7 +278,7 @@ async def list_report_schedules(
     List all scheduled reports for the organization.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     # Count total
     count_query = select(func.count(ReportSchedule.id)).where(
@@ -333,8 +333,8 @@ async def create_report_schedule(
     Create a new scheduled report.
     """
     # TODO: Get current user's org_id and user_id from auth
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     # Create the schedule
     schedule = ReportSchedule(
@@ -381,7 +381,7 @@ async def get_report_schedule(
     Get a specific scheduled report.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(ReportSchedule).where(
         ReportSchedule.id == schedule_id,
@@ -424,7 +424,7 @@ async def update_report_schedule(
     Update a scheduled report.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(ReportSchedule).where(
         ReportSchedule.id == schedule_id,
@@ -474,7 +474,7 @@ async def delete_report_schedule(
     Delete a scheduled report.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(ReportSchedule).where(
         ReportSchedule.id == schedule_id,
@@ -504,7 +504,7 @@ async def run_report_now(
     This generates and returns the report without waiting for the scheduled time.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(ReportSchedule).where(
         ReportSchedule.id == schedule_id,

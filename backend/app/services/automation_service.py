@@ -502,7 +502,7 @@ async def execute_action(
             if "in_app" in channels:
                 # Create in-app notification
                 notification = Notification(
-                    user_id=rule.created_by_id or "placeholder-user-id",
+                    user_id=rule.created_by_id or "00000000-0000-0000-0000-000000000002",
                     org_id=rule.org_id,
                     title=f"Automation: {rule.name}",
                     message=trigger_reason,

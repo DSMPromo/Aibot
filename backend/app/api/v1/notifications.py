@@ -105,7 +105,7 @@ async def list_notifications(
     Returns a paginated list of notifications with unread count.
     """
     # TODO: Get user_id from authenticated user
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     offset = (page - 1) * page_size
 
@@ -147,7 +147,7 @@ async def mark_as_read(
     Mark a notification as read.
     """
     # TODO: Get user_id from authenticated user
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     notification = await mark_notification_read(db, notification_id, user_id)
 
@@ -179,7 +179,7 @@ async def mark_all_as_read(
     Mark all notifications as read for the current user.
     """
     # TODO: Get user_id from authenticated user
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     count = await mark_all_notifications_read(db, user_id)
 
@@ -201,7 +201,7 @@ async def get_preferences(
     Returns channel preferences, type-specific settings, and quiet hours.
     """
     # TODO: Get user_id from authenticated user
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     preferences = await get_notification_preferences(db, user_id)
 
@@ -224,8 +224,8 @@ async def update_preferences(
     Partial updates are supported - only provided fields will be updated.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     update_data = {}
     if request.channels is not None:
@@ -270,7 +270,7 @@ async def set_slack_webhook_endpoint(
     The webhook will be used for Slack notifications.
     """
     # TODO: Get org_id from authenticated user (admin only)
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         await set_slack_webhook(db, org_id, request.webhook_url)
@@ -310,7 +310,7 @@ async def remove_slack_webhook(
     Remove the Slack webhook for the organization.
     """
     # TODO: Get org_id from authenticated user (admin only)
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         await set_slack_webhook(db, org_id, "")

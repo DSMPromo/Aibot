@@ -125,15 +125,13 @@ class WorkerSettings:
     ]
 
     # Redis connection settings
-    @staticmethod
-    def redis_settings() -> RedisSettings:
+    # Parse redis URL and create RedisSettings instance
+    # Format: redis://:password@host:port/db
+    @classmethod
+    def _get_redis_settings(cls) -> RedisSettings:
         """Get Redis settings from environment."""
-        # Parse redis URL
-        # Format: redis://:password@host:port/db
         import urllib.parse
-
         url = urllib.parse.urlparse(settings.redis_url)
-
         return RedisSettings(
             host=url.hostname or "localhost",
             port=url.port or 6379,
@@ -147,3 +145,7 @@ class WorkerSettings:
     keep_result = 3600  # Keep results for 1 hour
     max_tries = 3  # Retry failed jobs up to 3 times
     retry_delay = 60  # Wait 60 seconds before retry
+
+
+# Set redis_settings as class attribute (ARQ expects this)
+WorkerSettings.redis_settings = WorkerSettings._get_redis_settings()

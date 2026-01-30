@@ -71,11 +71,11 @@ async def get_current_user(request: Request):
     # TODO: Get current user from token and database
 
     return UserProfile(
-        id="placeholder-user-id",
+        id="00000000-0000-0000-0000-000000000002",
         email="user@example.com",
         name="Placeholder User",
         role="admin",
-        organization_id="placeholder-org-id",
+        organization_id="00000000-0000-0000-0000-000000000001",
         organization_name="My Organization",
         mfa_enabled=False,
         created_at="2026-01-29T00:00:00Z",
@@ -142,7 +142,7 @@ async def get_current_organization(request: Request):
     # TODO: Get current user and organization from database
 
     return {
-        "id": "placeholder-org-id",
+        "id": "00000000-0000-0000-0000-000000000001",
         "name": "My Organization",
         "plan_tier": "starter",
         "member_count": 3,

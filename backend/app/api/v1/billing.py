@@ -167,7 +167,7 @@ async def get_current_subscription(
     Returns subscription details including plan, status, and billing cycle.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     subscription = await get_subscription(db, org_id)
 
@@ -271,7 +271,7 @@ async def get_plan_limits(
     Returns limits based on the current subscription tier.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     subscription = await get_subscription(db, org_id)
 
@@ -297,7 +297,7 @@ async def create_checkout(
     Returns a URL to redirect the user to Stripe Checkout.
     """
     # TODO: Get org_id and email from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
     email = "user@example.com"
 
     try:
@@ -331,7 +331,7 @@ async def create_portal_session(
     Returns a URL to redirect the user to manage their subscription.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         portal_url = await create_billing_portal_session(
@@ -366,7 +366,7 @@ async def cancel_current_subscription(
     By default, cancels at the end of the current billing period.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         subscription = await cancel_subscription(
@@ -399,7 +399,7 @@ async def reactivate_current_subscription(
     Only works if the subscription is scheduled to cancel at period end.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         subscription = await reactivate_subscription(db=db, org_id=org_id)
@@ -433,7 +433,7 @@ async def list_invoices(
     Returns a paginated list of invoices.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     invoices, total = await get_invoices(db, org_id, limit=page_size, offset=offset)
@@ -478,7 +478,7 @@ async def list_payment_methods(
     Returns all active payment methods for the organization.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     payment_methods = await get_payment_methods(db, org_id)
 
@@ -507,7 +507,7 @@ async def remove_payment_method(
     Cannot remove the default payment method.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         await delete_payment_method(db, org_id, payment_method_id)
@@ -535,7 +535,7 @@ async def get_usage(
     Returns usage counts and remaining limits for the current billing period.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     now = datetime.now(timezone.utc)
     period_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -566,7 +566,7 @@ async def check_usage_limit(
     Returns whether the organization is within the limit and remaining count.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     is_within, remaining = await check_limit(db, org_id, limit_name, current_usage)
 

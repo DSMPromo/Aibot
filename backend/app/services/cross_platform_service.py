@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.campaign import Campaign, AdCopy
 from app.models.ad_account import AdAccount
-from app.models.metrics import CampaignDailyMetrics
+from app.models.metrics import CampaignMetrics
 
 logger = structlog.get_logger()
 
@@ -278,17 +278,17 @@ async def get_platform_comparison(
     metrics_result = await db.execute(
         select(
             Campaign.platform,
-            func.sum(CampaignDailyMetrics.impressions).label("impressions"),
-            func.sum(CampaignDailyMetrics.clicks).label("clicks"),
-            func.sum(CampaignDailyMetrics.spend).label("spend"),
-            func.sum(CampaignDailyMetrics.conversions).label("conversions"),
-            func.sum(CampaignDailyMetrics.conversion_value).label("conversion_value"),
+            func.sum(CampaignMetrics.impressions).label("impressions"),
+            func.sum(CampaignMetrics.clicks).label("clicks"),
+            func.sum(CampaignMetrics.spend).label("spend"),
+            func.sum(CampaignMetrics.conversions).label("conversions"),
+            func.sum(CampaignMetrics.conversion_value).label("conversion_value"),
         )
-        .join(Campaign, CampaignDailyMetrics.campaign_id == Campaign.id)
+        .join(Campaign, CampaignMetrics.campaign_id == Campaign.id)
         .where(
             Campaign.org_id == org_id,
-            CampaignDailyMetrics.date >= start_date,
-            CampaignDailyMetrics.date <= end_date,
+            func.date(CampaignMetrics.timestamp) >= start_date,
+            func.date(CampaignMetrics.timestamp) <= end_date,
         )
         .group_by(Campaign.platform)
     )
@@ -365,17 +365,17 @@ async def get_unified_metrics_summary(
     """
     result = await db.execute(
         select(
-            func.sum(CampaignDailyMetrics.impressions).label("impressions"),
-            func.sum(CampaignDailyMetrics.clicks).label("clicks"),
-            func.sum(CampaignDailyMetrics.spend).label("spend"),
-            func.sum(CampaignDailyMetrics.conversions).label("conversions"),
-            func.sum(CampaignDailyMetrics.conversion_value).label("conversion_value"),
+            func.sum(CampaignMetrics.impressions).label("impressions"),
+            func.sum(CampaignMetrics.clicks).label("clicks"),
+            func.sum(CampaignMetrics.spend).label("spend"),
+            func.sum(CampaignMetrics.conversions).label("conversions"),
+            func.sum(CampaignMetrics.conversion_value).label("conversion_value"),
         )
-        .join(Campaign, CampaignDailyMetrics.campaign_id == Campaign.id)
+        .join(Campaign, CampaignMetrics.campaign_id == Campaign.id)
         .where(
             Campaign.org_id == org_id,
-            CampaignDailyMetrics.date >= start_date,
-            CampaignDailyMetrics.date <= end_date,
+            func.date(CampaignMetrics.timestamp) >= start_date,
+            func.date(CampaignMetrics.timestamp) <= end_date,
         )
     )
 

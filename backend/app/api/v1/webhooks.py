@@ -151,7 +151,7 @@ async def list_endpoints(
     List webhook endpoints for the organization.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     endpoints, total = await list_webhook_endpoints(
@@ -198,8 +198,8 @@ async def create_endpoint(
     Returns the endpoint with its secret (secret is only shown once).
     """
     # TODO: Get org_id and user_id from authenticated user
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     try:
         endpoint = await create_webhook_endpoint(
@@ -248,7 +248,7 @@ async def get_endpoint(
     Get a webhook endpoint by ID.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     endpoint = await get_webhook_endpoint(db, endpoint_id, org_id)
     if not endpoint:
@@ -286,7 +286,7 @@ async def update_endpoint(
     Update a webhook endpoint.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         endpoint = await update_webhook_endpoint(
@@ -341,7 +341,7 @@ async def delete_endpoint(
     Delete a webhook endpoint.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     deleted = await delete_webhook_endpoint(db, endpoint_id, org_id)
     if not deleted:
@@ -362,7 +362,7 @@ async def regenerate_secret(
     The new secret will be returned and must be updated in your system.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     secret = await regenerate_webhook_secret(db, endpoint_id, org_id)
     if not secret:
@@ -383,7 +383,7 @@ async def test_endpoint(
     Send a test event to a webhook endpoint.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     try:
         delivery = await test_webhook_endpoint(db, endpoint_id, org_id)
@@ -430,7 +430,7 @@ async def list_deliveries(
     Get delivery history for a webhook endpoint.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     deliveries, total = await get_delivery_history(
@@ -476,7 +476,7 @@ async def get_delivery_detail(
     Get details of a specific delivery.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     delivery = await get_delivery(db, delivery_id, org_id)
     if not delivery:
@@ -512,7 +512,7 @@ async def resend_delivery_endpoint(
     Manually resend a delivery.
     """
     # TODO: Get org_id from authenticated user
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     delivery = await resend_delivery(db, delivery_id, org_id)
     if not delivery:

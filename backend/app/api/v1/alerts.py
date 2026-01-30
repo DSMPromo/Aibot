@@ -174,7 +174,7 @@ async def list_alerts(
     List all alerts for the organization.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     alerts, total = await get_alerts(
@@ -219,8 +219,8 @@ async def create_new_alert(
     Create a new alert.
     """
     # TODO: Get current user's org_id and user_id from auth
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     # Validate scope
     if request.scope_type == "campaign" and not request.campaign_id:
@@ -269,7 +269,7 @@ async def get_alert(
     Get a specific alert.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(Alert).where(Alert.id == alert_id, Alert.org_id == org_id)
     result = await db.execute(query)
@@ -308,7 +308,7 @@ async def update_existing_alert(
     Update an alert.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(Alert).where(Alert.id == alert_id, Alert.org_id == org_id)
     result = await db.execute(query)
@@ -349,7 +349,7 @@ async def delete_existing_alert(
     Delete an alert.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(Alert).where(Alert.id == alert_id, Alert.org_id == org_id)
     result = await db.execute(query)
@@ -373,7 +373,7 @@ async def evaluate_single_alert(
     Evaluate an alert and return the result (without triggering notifications).
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(Alert).where(Alert.id == alert_id, Alert.org_id == org_id)
     result = await db.execute(query)
@@ -404,7 +404,7 @@ async def check_all_alerts(
     Check all enabled alerts and trigger notifications where needed.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     evaluations = await check_and_trigger_alerts(db, org_id)
 
@@ -436,7 +436,7 @@ async def list_alert_history(
     Get alert history.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     offset = (page - 1) * page_size
     history, total = await get_alert_history(
@@ -480,7 +480,7 @@ async def acknowledge_alert_history(
     Acknowledge an alert from history.
     """
     # TODO: Get current user_id from auth
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     history = await acknowledge_alert(
         db=db,
@@ -526,7 +526,7 @@ async def list_notifications(
     Get notifications for the current user.
     """
     # TODO: Get current user_id from auth
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     offset = (page - 1) * page_size
     notifications, total = await get_notifications(
@@ -570,7 +570,7 @@ async def mark_notification_as_read(
     Mark a notification as read.
     """
     # TODO: Get current user_id from auth
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     notification = await mark_notification_read(db, notification_id, user_id)
 
@@ -602,7 +602,7 @@ async def mark_all_as_read(
     Mark all notifications as read.
     """
     # TODO: Get current user_id from auth
-    user_id = "placeholder-user-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     count = await mark_all_notifications_read(db, user_id)
 

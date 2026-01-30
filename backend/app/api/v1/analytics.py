@@ -17,6 +17,17 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+
+
+def get_date_range(start_date: Optional[date], end_date: Optional[date]) -> tuple[date, date]:
+    """Get date range with defaults if not provided."""
+    if end_date is None:
+        end_date = date.today()
+    if start_date is None:
+        start_date = end_date - timedelta(days=30)
+    return start_date, end_date
+
+
 from app.services.analytics_service import (
     get_overview_metrics,
     get_campaign_metrics_summary,
@@ -96,8 +107,8 @@ class TimeSeriesResponse(BaseModel):
 
 @router.get("/overview", response_model=MetricsComparisonResponse)
 async def get_analytics_overview(
-    start_date: date = Query(default_factory=lambda: date.today() - timedelta(days=30)),
-    end_date: date = Query(default_factory=date.today),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
     compare_previous: bool = Query(default=False, description="Include previous period comparison"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -109,8 +120,14 @@ async def get_analytics_overview(
 
     Optionally includes comparison with the previous period of equal length.
     """
+    # Set defaults if not provided
+    if end_date is None:
+        end_date = date.today()
+    if start_date is None:
+        start_date = end_date - timedelta(days=30)
+
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     # Validate date range
     if end_date < start_date:
@@ -173,7 +190,7 @@ async def get_today_overview(
     Returns current day's aggregated metrics for live monitoring.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     summary = await get_today_metrics(db=db, org_id=org_id)
 
@@ -193,8 +210,8 @@ async def get_today_overview(
 
 @router.get("/campaigns", response_model=CampaignMetricsListResponse)
 async def get_campaigns_metrics(
-    start_date: date = Query(default_factory=lambda: date.today() - timedelta(days=30)),
-    end_date: date = Query(default_factory=date.today),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -206,7 +223,10 @@ async def get_campaigns_metrics(
     date range. Supports pagination.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+
+    # Set defaults if not provided
+    start_date, end_date = get_date_range(start_date, end_date)
 
     # Validate date range
     if end_date < start_date:
@@ -257,8 +277,8 @@ async def get_campaigns_metrics(
 @router.get("/campaigns/{campaign_id}", response_model=MetricsComparisonResponse)
 async def get_campaign_metrics(
     campaign_id: str,
-    start_date: date = Query(default_factory=lambda: date.today() - timedelta(days=30)),
-    end_date: date = Query(default_factory=date.today),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
     compare_previous: bool = Query(default=False),
     db: AsyncSession = Depends(get_db),
 ):
@@ -267,6 +287,9 @@ async def get_campaign_metrics(
 
     Returns metrics with optional period-over-period comparison.
     """
+    # Set defaults if not provided
+    start_date, end_date = get_date_range(start_date, end_date)
+
     # Validate date range
     if end_date < start_date:
         raise HTTPException(
@@ -313,8 +336,8 @@ async def get_campaign_metrics(
 
 @router.get("/time-series", response_model=TimeSeriesResponse)
 async def get_analytics_time_series(
-    start_date: date = Query(default_factory=lambda: date.today() - timedelta(days=30)),
-    end_date: date = Query(default_factory=date.today),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
     granularity: str = Query(default="daily", pattern="^(hourly|daily|weekly)$"),
     campaign_id: Optional[str] = Query(default=None),
     db: AsyncSession = Depends(get_db),
@@ -326,7 +349,10 @@ async def get_analytics_time_series(
     Can be filtered to a specific campaign or show all campaigns.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+
+    # Set defaults if not provided
+    start_date, end_date = get_date_range(start_date, end_date)
 
     # Validate date range
     if end_date < start_date:
@@ -398,8 +424,8 @@ class PlatformComparisonResponse(BaseModel):
 
 @router.get("/platform-comparison", response_model=PlatformComparisonResponse)
 async def get_platform_comparison_endpoint(
-    start_date: date = Query(default_factory=lambda: date.today() - timedelta(days=30)),
-    end_date: date = Query(default_factory=date.today),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -409,7 +435,10 @@ async def get_platform_comparison_endpoint(
     along with spend share and performance indicators.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+
+    # Set defaults if not provided
+    start_date, end_date = get_date_range(start_date, end_date)
 
     # Validate date range
     if end_date < start_date:
@@ -452,8 +481,8 @@ class UnifiedMetricsResponse(BaseModel):
 
 @router.get("/unified", response_model=UnifiedMetricsResponse)
 async def get_unified_metrics_endpoint(
-    start_date: date = Query(default_factory=lambda: date.today() - timedelta(days=30)),
-    end_date: date = Query(default_factory=date.today),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -462,7 +491,10 @@ async def get_unified_metrics_endpoint(
     Provides a single view of total advertising performance regardless of platform.
     """
     # TODO: Get current user's org_id from auth
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+
+    # Set defaults if not provided
+    start_date, end_date = get_date_range(start_date, end_date)
 
     # Validate date range
     if end_date < start_date:

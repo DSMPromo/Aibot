@@ -287,8 +287,8 @@ async def create_campaign(
     Creates campaign in draft status. Must be submitted for approval before launch.
     """
     # TODO: Get current user and org from auth
-    user_id = "placeholder-user-id"
-    org_id = "placeholder-org-id"
+    user_id = "00000000-0000-0000-0000-000000000002"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     # TODO: Verify ad_account belongs to org
     # TODO: Get platform from ad_account
@@ -379,7 +379,7 @@ async def list_campaigns(
     Supports filtering by status, platform, and search term.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     # Build query
     query = select(Campaign).where(Campaign.org_id == org_id)
@@ -421,7 +421,7 @@ async def get_campaign(
     Get campaign details by ID.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
     return campaign
@@ -440,8 +440,8 @@ async def update_campaign(
     Only campaigns in draft or rejected status can be edited.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -500,8 +500,8 @@ async def delete_campaign(
     Campaigns that are live on platforms will be paused before archiving.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -545,7 +545,7 @@ async def add_ad_copy(
     Add an ad copy variation to a campaign.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -595,7 +595,7 @@ async def delete_ad_copy(
     Delete an ad copy from a campaign.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -647,8 +647,8 @@ async def submit_for_approval(
     Transitions from draft to pending_review.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -718,8 +718,8 @@ async def approve_campaign(
     """
     # TODO: Get current user's org_id and user_id
     # TODO: Verify user has manager or admin role
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -785,8 +785,8 @@ async def reject_campaign(
     """
     # TODO: Get current user's org_id and user_id
     # TODO: Verify user has manager or admin role
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -852,8 +852,8 @@ async def pause_campaign(
     Pause an active campaign.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -908,8 +908,8 @@ async def resume_campaign(
     Resume a paused campaign.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -970,8 +970,8 @@ async def bulk_action(
     Supported actions: pause, resume, archive
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     success_count = 0
     failures = []
@@ -1058,8 +1058,8 @@ async def duplicate_campaign(
     Creates a copy in draft status.
     """
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     original = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -1151,7 +1151,7 @@ async def list_pending_approvals(
     """
     # TODO: Get current user's org_id
     # TODO: Verify user has manager or admin role
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     query = select(Campaign).where(
         Campaign.org_id == org_id,
@@ -1194,7 +1194,7 @@ async def sync_campaign(
     Fetches the current status from the ad platform and updates the local record.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -1235,7 +1235,7 @@ async def push_campaign(
     Triggers immediate creation of the campaign on the ad platform.
     """
     # TODO: Get current user's org_id
-    org_id = "placeholder-org-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
 
     campaign = await get_campaign_or_404(db, campaign_id, org_id)
 
@@ -1312,8 +1312,8 @@ async def import_campaigns_csv(
     import io
 
     # TODO: Get current user's org_id and user_id
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     # Read body as text
     body = await request.body()
@@ -1487,8 +1487,8 @@ async def create_multi_platform_campaign_endpoint(
     with consistent settings and optional UTM tracking.
     """
     # TODO: Get from auth
-    org_id = "placeholder-org-id"
-    user_id = "placeholder-user-id"
+    org_id = "00000000-0000-0000-0000-000000000001"
+    user_id = "00000000-0000-0000-0000-000000000002"
 
     from app.services.cross_platform_service import create_multi_platform_campaign
 

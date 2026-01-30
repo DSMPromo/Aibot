@@ -475,7 +475,7 @@ async def check_and_trigger_alerts(
                 # Get org members to notify
                 # For now, create a single notification (in production, query org members)
                 notification = Notification(
-                    user_id=alert.created_by_id or "placeholder-user-id",
+                    user_id=alert.created_by_id or "00000000-0000-0000-0000-000000000002",
                     org_id=org_id,
                     title=f"Alert: {alert.name}",
                     message=evaluation.message,

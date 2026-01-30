@@ -55,9 +55,9 @@ async def get_current_user(
     if credentials is None:
         # Allow unauthenticated access in development with placeholder
         return CurrentUser(
-            id="dev-user-id",
+            id="00000000-0000-0000-0000-000000000002",
             email="dev@example.com",
-            org_id="dev-org-id",
+            org_id="00000000-0000-0000-0000-000000000001",
             role="admin",
             is_active=True,
         )
@@ -74,9 +74,9 @@ async def get_current_user(
     #     raise HTTPException(status_code=401, detail="Invalid token")
 
     return CurrentUser(
-        id="dev-user-id",
+        id="00000000-0000-0000-0000-000000000002",
         email="dev@example.com",
-        org_id="dev-org-id",
+        org_id="00000000-0000-0000-0000-000000000001",
         role="admin",
         is_active=True,
     )
