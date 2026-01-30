@@ -156,7 +156,7 @@ class Subscription(Base):
     cancellation_reason: Mapped[Optional[str]] = mapped_column(Text)
 
     # Metadata
-    metadata: Mapped[dict] = mapped_column(JSONB, default=dict)
+    extra_data: Mapped[dict] = mapped_column(JSONB, default=dict)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
@@ -420,7 +420,7 @@ class UsageRecord(Base):
     stripe_usage_record_id: Mapped[Optional[str]] = mapped_column(String(100))
 
     # Metadata
-    metadata: Mapped[dict] = mapped_column(JSONB, default=dict)
+    extra_data: Mapped[dict] = mapped_column(JSONB, default=dict)
 
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(

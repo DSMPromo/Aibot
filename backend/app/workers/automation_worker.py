@@ -11,7 +11,7 @@ import structlog
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session_maker
+from app.core.database import async_session_factory
 from app.models.automation import AutomationRule
 from app.models.campaign import Campaign
 from app.models.user import Organization
@@ -48,7 +48,7 @@ async def evaluate_automation_rules(ctx: dict) -> dict:
     rules_triggered = 0
     errors = 0
 
-    async with async_session_maker() as db:
+    async with async_session_factory() as db:
         # First, expire any pending actions
         expired_count = await expire_pending_actions(db)
         if expired_count > 0:
@@ -249,7 +249,7 @@ async def run_single_rule(ctx: dict, rule_id: str) -> dict:
     """
     logger.info("Manually running rule", rule_id=rule_id)
 
-    async with async_session_maker() as db:
+    async with async_session_factory() as db:
         rule_query = select(AutomationRule).where(AutomationRule.id == rule_id)
         rule_result = await db.execute(rule_query)
         rule = rule_result.scalar_one_or_none()

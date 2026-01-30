@@ -5,11 +5,28 @@ All configuration is loaded from environment variables with sensible defaults
 for development. In production, set all required variables.
 """
 
+import json
 from functools import lru_cache
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def parse_list(v: Union[str, List[str]]) -> List[str]:
+    """Parse a comma-separated string or JSON array into a list."""
+    if isinstance(v, list):
+        return v
+    if not v:
+        return []
+    # Try JSON first
+    if v.startswith("["):
+        try:
+            return json.loads(v)
+        except json.JSONDecodeError:
+            pass
+    # Fall back to comma-separated
+    return [item.strip() for item in v.split(",")]
 
 
 class Settings(BaseSettings):
@@ -90,10 +107,8 @@ class Settings(BaseSettings):
     @field_validator("allowed_hosts", "cors_origins", mode="before")
     @classmethod
     def split_string_to_list(cls, v):
-        """Split comma-separated string to list."""
-        if isinstance(v, str):
-            return [item.strip() for item in v.split(",")]
-        return v
+        """Parse comma-separated string or JSON array to list."""
+        return parse_list(v)
 
     # =========================================================================
     # Rate Limiting

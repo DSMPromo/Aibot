@@ -89,7 +89,7 @@ class AdAccount(Base):
     consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
 
     # Platform-specific metadata
-    metadata: Mapped[Optional[dict]] = mapped_column(JSONB)
+    extra_data: Mapped[Optional[dict]] = mapped_column(JSONB)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(

@@ -61,7 +61,7 @@ class AuditLog(Base):
     request_id: Mapped[Optional[str]] = mapped_column(String(50))
 
     # Additional metadata
-    metadata: Mapped[Optional[dict]] = mapped_column(JSONB)
+    extra_data: Mapped[Optional[dict]] = mapped_column(JSONB)
 
     # Impersonation tracking
     impersonator_id: Mapped[Optional[str]] = mapped_column(

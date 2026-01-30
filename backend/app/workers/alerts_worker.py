@@ -11,7 +11,7 @@ import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session_maker
+from app.core.database import async_session_factory
 from app.models.user import Organization
 from app.services.alerts_service import check_and_trigger_alerts
 
@@ -35,7 +35,7 @@ async def check_all_alerts(ctx: dict) -> dict:
     logger.info("Starting alert check job")
     start_time = datetime.now(timezone.utc)
 
-    async with async_session_maker() as db:
+    async with async_session_factory() as db:
         # Get all organizations
         org_query = select(Organization.id)
         org_result = await db.execute(org_query)
